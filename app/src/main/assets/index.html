@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>task_2_18</title>
+    <style type="text/css">
+        #boxArray{
+        list-style: none;
+        }
+        #boxArray li{
+        display: block;
+        width: 50px;
+        height: 50px;
+        text-align: center;
+        background: #f00;
+        float: left;
+        color: white;
+        margin: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="inputdiv">
+    <input type="text" name="value" id="inputtxt">
+    <input type="button" name="leftin" value="左侧入" id="leftin">
+    <input type="button" name="rightin" value="右侧入" id="rightin">
+    <input type="button" name="leftout" value="左侧出" id="leftout">
+    <input type="button" name="rightout" value="右侧出" id="rightout">
+</div>
+<ul id="boxArray">
+</ul>
+<script type="text/javascript">
+	(function(){
+		var boxes = [10,3,7,12,11,30];
+		var boxArray = document.getElementById("boxArray");
+
+		function generateBoxes (box) {
+			var html = "";
+			box.forEach( function(element, index) {
+				html += "<li>"+element+"</li>";
+			});
+			boxArray.innerHTML = "";
+			boxArray.innerHTML = html;
+		}
+		document.getElementById("leftin").onclick = changeItem;
+		document.getElementById("rightin").onclick = changeItem;
+		document.getElementById("leftout").onclick = changeItem;
+		document.getElementById("rightout").onclick = changeItem;
+
+		function changeItem () {
+			var action = this.id;
+			var inputtxt = document.getElementById("inputtxt").value;
+			switch (action) {
+				case "leftin":
+					boxes.unshift(inputtxt);
+					break;
+			 	case "rightin":
+			 		boxes.push(inputtxt);
+					break;
+				case "leftout":
+					boxes.shift();
+					break;
+				case "rightout":
+					boxes.pop();
+					break;
+				default:
+					break;
+			}
+			 generateBoxes(boxes);
+
+		}
+
+		generateBoxes(boxes);
+	})();
+</script>
+</body>
+</html>

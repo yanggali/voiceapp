@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">图睿</string>
+    <string name="welcome">您身边的图书馆秘书</string>
+    <string name="loginLeft">Forget password?</string>
+    <string name="loginRight">New?Register here</string>
+    <string name="questions">亲，不懂可以摸摸我：有什么新书吗？《1Q84》在哪里？今天天气如何？</string>
+    <string name="Description">发送消息</string>
+</resources>
