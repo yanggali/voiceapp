@@ -1,13 +1,14 @@
 package com.suda.voice;
 
 import android.content.Context;
+import android.text.method.LinkMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import com.suda.helloworld.R;
+import com.suda.voice.R;
 
 import java.util.List;
 
@@ -51,6 +52,7 @@ public class ChatAdapter extends BaseAdapter{
                 convertView = LayoutInflater.from(mContext).inflate(R.layout.send_message_from,null);
                 content = (TextView)convertView.findViewById(R.id.From_Content);
                 content.setText(mData.get(position).getContent());
+                content.setMovementMethod(LinkMovementMethod.getInstance());
                 break;
         }
         return convertView;

@@ -5,4 +5,5 @@
     <color name="colorAccent">#FF4081</color>
     <color name="opaque_red">#f00</color>
     <color name="login">#ff9470</color>
+    <color name="line_between">#c222</color>
 </resources>

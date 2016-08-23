@@ -16,4 +16,8 @@
     <style name="LoginPage">
         <item name="android:textColor">#aaffffff</item>
     </style>
+    <style name="BookDetails">
+        <item name="android:textSize">25sp</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
 </resources>
