@@ -101,9 +101,16 @@ public class MainActivity extends Activity {
                                 public void onResponse(String results)
                                 {
                                     if (!results.equals("")){
-                                        Intent intent = new Intent(MainActivity.this,BookListActivity.class);
-                                        intent.putExtra("results",results);
-                                        startActivity(intent);
+                                        if (results.indexOf("not found") > 0){
+                                            mData.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.server_error)));
+                                            mAdapter.notifyDataSetChanged();
+                                        }
+                                        else
+                                        {
+                                            Intent intent = new Intent(MainActivity.this,BookListActivity.class);
+                                            intent.putExtra("results",results);
+                                            startActivity(intent);
+                                        }
                                     }
                                     else {
                                         mData.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.book_not_found)));
@@ -111,31 +118,6 @@ public class MainActivity extends Activity {
                                     }
                                 }
                             });
-                    //将请求发送至服务器
-//                    OkHttpClient mOkHttpClient = new OkHttpClient();
-//                    //创建一个Request
-//                    Request request = new Request.Builder()
-//                            .url("http://voice.tunnel.qydev.com/voice-app/book/name/"+input)
-//                            .build();
-//                    //new call
-//                    Call call = mOkHttpClient.newCall(request);
-//                    //请求加入调度
-//                    call.enqueue(new Callback()
-//                    {
-//                        @Override
-//                        public void onFailure(Request request, IOException e)
-//                        {
-//                        }
-//
-//                        @Override
-//                        public void onResponse(final Response response) throws IOException
-//                        {
-//                            String getStr =  response.body().string();
-//                            Intent intent = new Intent(MainActivity.this,BookListActivity.class);
-//                            intent.putExtra("results",getStr);
-//                            startActivity(intent);
-//                        }
-//                   });
                 }
                 else {
                     mData.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.input_null)));

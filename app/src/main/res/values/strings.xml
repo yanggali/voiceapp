@@ -5,7 +5,7 @@
     <string name="loginRight">New?Register here</string>
     <string name="questions">亲，不懂可以摸摸我：有什么新书吗？《1Q84》在哪里？今天天气如何？</string>
     <string name="Description">发送消息</string>
-    <string name="hint">你想查询什么？书目检索请输入1</string>
+    <string name="hint">你想查询什么？请输入您要查询的书目名称</string>
     <string name="exception">没有查询到结果，请重新输入</string>
     <string name="booktitle">书目详情</string>
     <string name="bookname">书名</string>
@@ -15,5 +15,6 @@
     <string name="callno">callno</string>
     <string name="hold">存放信息</string>
     <string name="book_not_found">未查阅到相关书籍结果</string>
+    <string name="server_error">访问服务器错误</string>
     <string name="input_null">请输入您要查阅的书籍</string>
 </resources>

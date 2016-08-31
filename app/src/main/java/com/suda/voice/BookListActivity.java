@@ -21,6 +21,7 @@ public class BookListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_list);
+        //requestWindowFeature(Window.FEATURE_NO_TITLE);
         ListView booklist_layout = (ListView)findViewById(R.id.book_list);
         String results = getIntent().getStringExtra("results");
         booklist = new LinkedList<Book>();

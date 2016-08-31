@@ -26,73 +26,118 @@
             android:layout_height="wrap_content"
             android:text="@string/booktitle"
             android:textColor="#fff"
-            android:textSize="30dp"
+            android:textSize="30sp"
             />
     </LinearLayout>
     <LinearLayout
-        android:padding="@dimen/activity_horizontal_padding"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:background="@mipmap/book_face"
         android:orientation="vertical"
-        android:background="#8fff"
-        >
+        android:gravity="center">
         <TextView
             android:id="@+id/bookname"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/bookname"
-            />
-        <View  android:layout_height="1px"
-            android:layout_width="match_parent"
-            android:background="@color/line_between"
+            android:textSize="24sp"
             />
         <TextView
             android:id="@+id/author"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/author"
             />
-        <View  android:layout_height="1px"
-            android:layout_width="match_parent"
-            android:background="@color/line_between"
-            />
         <TextView
             android:id="@+id/publisher"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/publisher"
             />
-        <View  android:layout_height="1px"
-            android:layout_width="match_parent"
-            android:background="@color/line_between"
-            />
         <TextView
             android:id="@+id/isbn"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/isbn"
             />
-        <View  android:layout_height="1px"
-            android:layout_width="match_parent"
-            android:background="@color/line_between"
-            />
         <TextView
             android:id="@+id/callno"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/callno"
             />
-        <View  android:layout_height="1px"
-            android:layout_width="match_parent"
-            android:background="@color/line_between"
-            />
         <TextView
             android:id="@+id/hold"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/hold"
             />
 
     </LinearLayout>
+    <!--<LinearLayout-->
+        <!--android:padding="@dimen/activity_horizontal_padding"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:orientation="vertical"-->
+        <!--android:background="#8fff"-->
+        <!--&gt;-->
+        <!--<TextView-->
+            <!--android:id="@+id/bookname"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="@string/bookname"-->
+            <!--/>-->
+        <!--<View  android:layout_height="1px"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:background="@color/line_between"-->
+            <!--/>-->
+        <!--<TextView-->
+            <!--android:id="@+id/author"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="@string/author"-->
+            <!--/>-->
+        <!--<View  android:layout_height="1px"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:background="@color/line_between"-->
+            <!--/>-->
+        <!--<TextView-->
+            <!--android:id="@+id/publisher"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="@string/publisher"-->
+            <!--/>-->
+        <!--<View  android:layout_height="1px"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:background="@color/line_between"-->
+            <!--/>-->
+        <!--<TextView-->
+            <!--android:id="@+id/isbn"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="@string/isbn"-->
+            <!--/>-->
+        <!--<View  android:layout_height="1px"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:background="@color/line_between"-->
+            <!--/>-->
+        <!--<TextView-->
+            <!--android:id="@+id/callno"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="@string/callno"-->
+            <!--/>-->
+        <!--<View  android:layout_height="1px"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:background="@color/line_between"-->
+            <!--/>-->
+        <!--<TextView-->
+            <!--android:id="@+id/hold"-->
+            <!--android:layout_width="match_parent"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="@string/hold"-->
+            <!--/>-->
+
+    <!--</LinearLayout>-->
 
 </LinearLayout>
