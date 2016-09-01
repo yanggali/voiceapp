@@ -28,4 +28,5 @@ dependencies {
     compile 'com.squareup.okio:okio:1.5.0'
     compile 'com.alibaba:fastjson:1.2.16'
     compile 'com.google.code.gson:gson:2.7'
+    compile files('libs/Msc.jar')
 }

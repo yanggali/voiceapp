@@ -3,26 +3,37 @@ package com.suda.voice;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.database.DataSetObserver;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.iflytek.cloud.ErrorCode;
+import com.iflytek.cloud.InitListener;
+import com.iflytek.cloud.RecognizerResult;
+import com.iflytek.cloud.SpeechConstant;
+import com.iflytek.cloud.SpeechError;
+import com.iflytek.cloud.SpeechUtility;
+import com.iflytek.cloud.ui.RecognizerDialog;
+import com.iflytek.cloud.ui.RecognizerDialogListener;
 import com.squareup.okhttp.Request;
 import com.suda.utils.http.okhttp.OkHttpClientManager;
 
 import java.util.ArrayList;
 import java.util.List;
-/**
- * Created by YangJiali on 2016/8/16 0016.
- */
+
 
 public class MainActivity extends Activity {
     private ImageView editView,voiceView,searchView;
@@ -32,7 +43,10 @@ public class MainActivity extends Activity {
     private List<ChatMessage> mData;
     private ChatAdapter mAdapter;
     private TextView preQuestions;
+    private RecognizerDialog iatDialog;
     private ListView mList;
+    private List<ChatMessage> messageList = new ArrayList<ChatMessage>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,10 +62,12 @@ public class MainActivity extends Activity {
         preQuestions.setMovementMethod(new ScrollingMovementMethod());
 
         mList = (ListView) findViewById(R.id.list);
-        mData = new ArrayList<ChatMessage>();
-        mData = LoadData();
-        mAdapter = new ChatAdapter(MainActivity.this,mData);
-        mList.setAdapter(mAdapter);
+
+        initData();
+//        mData = new ArrayList<ChatMessage>();
+//        mData = LoadData();
+//        mAdapter = new ChatAdapter(MainActivity.this,mData);
+//        mList.setAdapter(mAdapter);
 
         editView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -78,60 +94,68 @@ public class MainActivity extends Activity {
                 }
             }
         });
-        //发送请求，初步实现按照书名返回书目列表
+
+        //点击语音输入
+        voiceView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //语音配置对象初始化
+                SpeechUtility.createUtility(
+                        MainActivity.this, SpeechConstant.APPID + "=57b428c3");
+                //有交互动画的语音识别器
+                iatDialog = new RecognizerDialog(MainActivity.this, mInitListener);
+                iatDialog.setListener(new RecognizerDialogListener() {
+                    String resultJson = "[";
+                    @Override
+                    public void onResult(RecognizerResult recognizerResult, boolean isLast) {
+                        System.out.println("-----------------   onResult   -----------------");
+                        if (!isLast){
+                            resultJson += recognizerResult.getResultString() + ",";
+                        } else {
+                            resultJson += recognizerResult.getResultString() + "]";
+                        }
+
+                        if (isLast) {
+                            //解析语音识别后返回的json格式字符串
+                            Gson gson = new Gson();
+                            List<DictationResult> resultList = gson.fromJson(resultJson,
+                                    new TypeToken<List<DictationResult>>(){
+                                    }.getType());
+                            String result = "";
+                            for (int i=0; i<resultList.size()-1; i++){
+                                result += resultList.get(i).toString();
+                            }
+                            send(result);
+                        }
+                    }
+
+                    @Override
+                    public void onError(SpeechError speechError) {
+                        speechError.getPlainDescription(true);
+                    }
+                });
+
+                iatDialog.show();
+            }
+        });
+
+        //第position项被点击是触发该方法
+        mList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+            }
+        });
+
+        //文字输入模式发送按钮
         send.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String input = editText.getText().toString().trim();
-                editText.setText("");
-                if (!input.equals("")){
-                    //将发送信息显示至聊天框
-                    mData.add(new ChatMessage(ChatMessage.Message_To,input));
-                    mAdapter = new ChatAdapter(MainActivity.this,mData);
-                    mList.setAdapter(mAdapter);
-                    OkHttpClientManager.getAsyn("http://voice.tunnel.qydev.com/voice-app/book/name/"+input,
-                            new OkHttpClientManager.ResultCallback<String>()
-                            {
-                                @Override
-                                public void onError(Request request, Exception e)
-                                {
-                                    e.printStackTrace();
-                                }
-                                @Override
-                                public void onResponse(String results)
-                                {
-                                    if (!results.equals("")){
-                                        if (results.indexOf("not found") > 0){
-                                            mData.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.server_error)));
-                                            mAdapter.notifyDataSetChanged();
-                                        }
-                                        else
-                                        {
-                                            Intent intent = new Intent(MainActivity.this,BookListActivity.class);
-                                            intent.putExtra("results",results);
-                                            startActivity(intent);
-                                        }
-                                    }
-                                    else {
-                                        mData.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.book_not_found)));
-                                        mAdapter.notifyDataSetChanged();
-                                    }
-                                }
-                            });
-                }
-                else {
-                    mData.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.input_null)));
-                    mAdapter.notifyDataSetChanged();
-                }
+                send(input);
             }
         });
-        mAdapter.registerDataSetObserver(new DataSetObserver() {
-            @Override
-            public void onChanged() {
-                super.onChanged();
-                mList.setSelection(mAdapter.getCount()-1);
-            }
-        });
+
         //点击屏幕其他地方 隐藏输入框
         findViewById(R.id.mainpage).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -144,6 +168,28 @@ public class MainActivity extends Activity {
 
     }
 
+    /**
+     * 加载历史消息，后期从数据库中读取
+     */
+    public void initData(){
+        ChatMessage Entity = new ChatMessage(0,"欢迎回来，很高兴为您服务！");
+        messageList.add(Entity);
+        mAdapter = new ChatAdapter(MainActivity.this,messageList);
+        mList.setAdapter(mAdapter);
+    }
+
+    public static final String TAG = "MainActivity";
+    private InitListener mInitListener = new InitListener() {
+        @Override
+        public void onInit(int code) {
+            Log.d(TAG, "SpeechRecognizer init() code = " + code);
+            if (code != ErrorCode.SUCCESS){
+                Toast.makeText(MainActivity.this, "初始化失败，错误码：" + code,
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+    };
+
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
@@ -152,17 +198,103 @@ public class MainActivity extends Activity {
         }
         return super.onKeyDown(keyCode, event);
     }
-    //初始化提醒聊天框
+
+    /**
+     * 发送消息
+     * @param message the content of the message
+     */
+    public void send(String message){
+        editText.setText("");
+        if (!message.equals("")){
+            //将发送信息显示至聊天框
+            messageList.add(new ChatMessage(ChatMessage.Message_To,message));
+            mAdapter = new ChatAdapter(MainActivity.this,messageList);
+            mList.setAdapter(mAdapter);
+            OkHttpClientManager.getAsyn("http://voice.tunnel.qydev.com/voice-app/book/name/"+message,
+                    new OkHttpClientManager.ResultCallback<String>()
+                    {
+                        @Override
+                        public void onError(Request request, Exception e)
+                        {
+                            e.printStackTrace();
+                        }
+                        @Override
+                        public void onResponse(String results)
+                        {
+                            if (!results.equals("")){
+                                if (results.indexOf("not found") > 0){
+                                    messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.server_error)));
+                                    mAdapter.notifyDataSetChanged();
+                                }
+                                else
+                                {
+                                    Intent intent = new Intent(MainActivity.this,BookListActivity.class);
+                                    intent.putExtra("results",results);
+                                    startActivity(intent);
+                                }
+                            }
+                            else {
+                                messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.book_not_found)));
+                                mAdapter.notifyDataSetChanged();
+                            }
+                        }
+                    });
+        }
+        else {
+            messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.input_null)));
+            mAdapter.notifyDataSetChanged();
+        }
+    }
+
+//    /**
+//     * 发送文字输入的消息
+//     */
+//    public void send(){
+//
+//    }
+
+    //聊天框样式展示
     private List<ChatMessage> LoadData()
     {
         List<ChatMessage> Messages=new ArrayList<ChatMessage>();
 
         ChatMessage Message;
 
-        Message=new ChatMessage(ChatMessage.Message_From,getString(R.string.hint));
+        Message=new ChatMessage(ChatMessage.Message_From,"山重水复疑无路，柳暗花明又一村。小荷才露尖尖角");
         Messages.add(Message);
 
+        Message=new ChatMessage(ChatMessage.Message_To,"柳暗花明又一村");
+        Messages.add(Message);
 
+        Message=new ChatMessage(ChatMessage.Message_From,"青青子衿，悠悠我心");
+        Messages.add(Message);
+
+        Message=new ChatMessage(ChatMessage.Message_To,"但为君故，沉吟至今");
+        Messages.add(Message);
+
+        Message=new ChatMessage(ChatMessage.Message_From,"这是你做的Android程序吗？");
+        Messages.add(Message);
+
+        Message=new ChatMessage(ChatMessage.Message_To,"是的，这是一个仿微信的聊天界面");
+        Messages.add(Message);
+
+        Message=new ChatMessage(ChatMessage.Message_From,"为什么下面的消息发送不了呢");
+        Messages.add(Message);
+
+        Message=new ChatMessage(ChatMessage.Message_To,"呵呵，我会告诉你那是直接拿图片做的么");
+        Messages.add(Message);
+
+        Message=new ChatMessage(ChatMessage.Message_From,"哦哦，呵呵，你又在偷懒了");
+        Messages.add(Message);
+
+        Message=new ChatMessage(ChatMessage.Message_To,"因为这一部分不是今天的重点啊");
+        Messages.add(Message);
+
+        Message=new ChatMessage(ChatMessage.Message_From,"好吧，可是怎么发图片啊");
+        Messages.add(Message);
+
+        Message=new ChatMessage(ChatMessage.Message_To,"很简单啊，你继续定义一种布局类型，然后再写一个布局就可以了");
+        Messages.add(Message);
         return Messages;
     }
 }
