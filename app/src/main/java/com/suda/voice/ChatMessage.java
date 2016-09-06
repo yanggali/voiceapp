@@ -9,6 +9,7 @@ public class ChatMessage {
 
     private int mType;
     private String Content;
+    public ChatMessage(){};
     public ChatMessage(int mType, String Content) {
         this.mType = mType;
         this.Content = Content;

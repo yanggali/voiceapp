@@ -17,4 +17,5 @@
     <string name="book_not_found">未查阅到相关书籍结果</string>
     <string name="server_error">访问服务器错误</string>
     <string name="input_null">请输入您要查阅的书籍</string>
+    <string name="no_authority">您暂时没有该权限</string>
 </resources>

@@ -3,6 +3,7 @@ package com.suda.voice;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -29,6 +30,8 @@ import com.iflytek.cloud.SpeechUtility;
 import com.iflytek.cloud.ui.RecognizerDialog;
 import com.iflytek.cloud.ui.RecognizerDialogListener;
 import com.squareup.okhttp.Request;
+import com.suda.utils.chatrobot.RobotMessage;
+import com.suda.utils.chatrobot.TulingRobot;
 import com.suda.utils.http.okhttp.OkHttpClientManager;
 
 import java.util.ArrayList;
@@ -64,10 +67,6 @@ public class MainActivity extends Activity {
         mList = (ListView) findViewById(R.id.list);
 
         initData();
-//        mData = new ArrayList<ChatMessage>();
-//        mData = LoadData();
-//        mAdapter = new ChatAdapter(MainActivity.this,mData);
-//        mList.setAdapter(mAdapter);
 
         editView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -205,44 +204,85 @@ public class MainActivity extends Activity {
      */
     public void send(String message){
         editText.setText("");
+        SharedPreferences preferences = getSharedPreferences("user",Context.MODE_PRIVATE);
+        String name = preferences.getString("name","");
+        String password = preferences.getString("password","");
+
         if (!message.equals("")){
-            //将发送信息显示至聊天框
             messageList.add(new ChatMessage(ChatMessage.Message_To,message));
-            mAdapter = new ChatAdapter(MainActivity.this,messageList);
-            mList.setAdapter(mAdapter);
-            OkHttpClientManager.getAsyn("http://voice.tunnel.qydev.com/voice-app/book/name/"+message,
-                    new OkHttpClientManager.ResultCallback<String>()
-                    {
-                        @Override
-                        public void onError(Request request, Exception e)
+            mAdapter.notifyDataSetChanged();
+            if(message.indexOf("找书") >= 0)
+            {
+                //游客登录状态，无查书权限
+                if (name.equals("visitor"))
+                {
+                    messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.no_authority)));
+                    mAdapter.notifyDataSetChanged();
+                    return;
+                }
+                else
+                {
+                    messageList.add(new ChatMessage(ChatMessage.Message_From,"请说出你要找的书名"));
+                    mAdapter.notifyDataSetChanged();
+                    return;
+                }
+
+
+            }
+            else if (messageList.get(messageList.size()-2).getContent().equals("请说出你要找的书名"))
+            {
+                OkHttpClientManager.getAsyn("http://voice.tunnel.qydev.com/voice-app/book/name/"+message,
+                        new OkHttpClientManager.ResultCallback<String>()
                         {
-                            e.printStackTrace();
-                        }
-                        @Override
-                        public void onResponse(String results)
-                        {
-                            if (!results.equals("")){
-                                if (results.indexOf("not found") > 0){
-                                    messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.server_error)));
+                            @Override
+                            public void onError(Request request, Exception e)
+                            {
+                                e.printStackTrace();
+                            }
+                            @Override
+                            public void onResponse(String results)
+                            {
+                                if (!results.equals("")){
+                                    if (results.indexOf("not found") > 0){
+                                        messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.server_error)));
+                                        mAdapter.notifyDataSetChanged();
+                                    }
+                                    else
+                                    {
+                                        Intent intent = new Intent(MainActivity.this,BookListActivity.class);
+                                        intent.putExtra("results",results);
+                                        startActivity(intent);
+                                    }
+                                }
+                                else {
+                                    messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.book_not_found)));
                                     mAdapter.notifyDataSetChanged();
                                 }
-                                else
-                                {
-                                    Intent intent = new Intent(MainActivity.this,BookListActivity.class);
-                                    intent.putExtra("results",results);
-                                    startActivity(intent);
-                                }
                             }
-                            else {
-                                messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.book_not_found)));
+                        });
+            }
+            else
+            {
+                OkHttpClientManager.getAsyn(TulingRobot.setParams(message),
+                        new OkHttpClientManager.ResultCallback<RobotMessage>()
+                        {
+                            @Override
+                            public void onError(Request request, Exception e)
+                            {
+                                e.printStackTrace();
+                            }
+                            @Override
+                            public void onResponse(RobotMessage robotMessage)
+                            {
+                                messageList.add(new ChatMessage(ChatMessage.Message_From,robotMessage.getText()));
                                 mAdapter.notifyDataSetChanged();
                             }
-                        }
-                    });
+                        });
+            }
+
         }
         else {
-            messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.input_null)));
-            mAdapter.notifyDataSetChanged();
+            Toast.makeText(MainActivity.this,"说点什么吧",Toast.LENGTH_LONG).show();
         }
     }
 
@@ -263,38 +303,7 @@ public class MainActivity extends Activity {
         Message=new ChatMessage(ChatMessage.Message_From,"山重水复疑无路，柳暗花明又一村。小荷才露尖尖角");
         Messages.add(Message);
 
-        Message=new ChatMessage(ChatMessage.Message_To,"柳暗花明又一村");
-        Messages.add(Message);
 
-        Message=new ChatMessage(ChatMessage.Message_From,"青青子衿，悠悠我心");
-        Messages.add(Message);
-
-        Message=new ChatMessage(ChatMessage.Message_To,"但为君故，沉吟至今");
-        Messages.add(Message);
-
-        Message=new ChatMessage(ChatMessage.Message_From,"这是你做的Android程序吗？");
-        Messages.add(Message);
-
-        Message=new ChatMessage(ChatMessage.Message_To,"是的，这是一个仿微信的聊天界面");
-        Messages.add(Message);
-
-        Message=new ChatMessage(ChatMessage.Message_From,"为什么下面的消息发送不了呢");
-        Messages.add(Message);
-
-        Message=new ChatMessage(ChatMessage.Message_To,"呵呵，我会告诉你那是直接拿图片做的么");
-        Messages.add(Message);
-
-        Message=new ChatMessage(ChatMessage.Message_From,"哦哦，呵呵，你又在偷懒了");
-        Messages.add(Message);
-
-        Message=new ChatMessage(ChatMessage.Message_To,"因为这一部分不是今天的重点啊");
-        Messages.add(Message);
-
-        Message=new ChatMessage(ChatMessage.Message_From,"好吧，可是怎么发图片啊");
-        Messages.add(Message);
-
-        Message=new ChatMessage(ChatMessage.Message_To,"很简单啊，你继续定义一种布局类型，然后再写一个布局就可以了");
-        Messages.add(Message);
         return Messages;
     }
 }
