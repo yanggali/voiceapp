@@ -7,7 +7,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    style="@style/BookDetails"
+
     tools:context="com.suda.voice.BookActivity"
     android:orientation="vertical">
 
@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:background="@mipmap/book_face"
         android:orientation="vertical"
-        android:gravity="center">
+        android:padding="70dp">
         <TextView
             android:id="@+id/bookname"
             android:layout_width="wrap_content"
@@ -44,30 +44,35 @@
             />
         <TextView
             android:id="@+id/author"
+            android:layout_marginTop="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/author"
             />
         <TextView
             android:id="@+id/publisher"
+            android:layout_marginTop="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/publisher"
             />
         <TextView
             android:id="@+id/isbn"
+            android:layout_marginTop="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/isbn"
             />
         <TextView
             android:id="@+id/callno"
+            android:layout_marginTop="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/callno"
             />
         <TextView
             android:id="@+id/hold"
+            android:layout_marginTop="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/hold"

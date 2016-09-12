@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -34,6 +36,14 @@ import com.suda.utils.chatrobot.RobotMessage;
 import com.suda.utils.chatrobot.TulingRobot;
 import com.suda.utils.http.okhttp.OkHttpClientManager;
 
+import net.paoding.analysis.analyzer.PaodingAnalyzer;
+
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.Token;
+import org.apache.lucene.analysis.TokenStream;
+
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +59,7 @@ public class MainActivity extends Activity {
     private RecognizerDialog iatDialog;
     private ListView mList;
     private List<ChatMessage> messageList = new ArrayList<ChatMessage>();
+    private String cardid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,7 +78,9 @@ public class MainActivity extends Activity {
         mList = (ListView) findViewById(R.id.list);
 
         initData();
-
+        //获取用户信息
+        SharedPreferences preferences = getSharedPreferences("user",Context.MODE_PRIVATE);
+        cardid = preferences.getString("cardid","");
         editView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -167,11 +180,18 @@ public class MainActivity extends Activity {
 
     }
 
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.tips)));
+        mAdapter.notifyDataSetChanged();
+    }
+
     /**
      * 加载历史消息，后期从数据库中读取
      */
     public void initData(){
-        ChatMessage Entity = new ChatMessage(0,"欢迎回来，很高兴为您服务！");
+        ChatMessage Entity = new ChatMessage(0,getString(R.string.tips));
         messageList.add(Entity);
         mAdapter = new ChatAdapter(MainActivity.this,messageList);
         mList.setAdapter(mAdapter);
@@ -204,65 +224,90 @@ public class MainActivity extends Activity {
      */
     public void send(String message){
         editText.setText("");
-        SharedPreferences preferences = getSharedPreferences("user",Context.MODE_PRIVATE);
-        String name = preferences.getString("name","");
-        String password = preferences.getString("password","");
+        messageList.add(new ChatMessage(ChatMessage.Message_To,message));
+        mAdapter.notifyDataSetChanged();
+        switch (schema(message))
+        {
+            case 1:
+                messageList.add(new ChatMessage(ChatMessage.Message_From,"请问您要根据什么找书？书名还是作者？"));
+                mAdapter.notifyDataSetChanged();
+                break;
+            case 2:
+                messageList.add(new ChatMessage(ChatMessage.Message_From,"请说出书名"));
+                mAdapter.notifyDataSetChanged();
+                break;
+            case 3:
+                messageList.add(new ChatMessage(ChatMessage.Message_From,"请说出作者"));
+                mAdapter.notifyDataSetChanged();
+                break;
+            case 4:
+                getList("book/name/"+message,BookListActivity.class);
+                break;
+//                OkHttpClientManager.getAsyn(getString(R.string.domain)+"book/name/"+message,
+//                        new OkHttpClientManager.ResultCallback<String>()
+//                        {
+//                            @Override
+//                            public void onError(Request request, Exception e)
+//                            {
+//                                e.printStackTrace();
+//                            }
+//                            @Override
+//                            public void onResponse(String results)
+//                            {
+//                                if (!results.equals("")){
+//                                    if (results.indexOf("not found") > 0){
+//                                        messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.server_error)));
+//                                        mAdapter.notifyDataSetChanged();
+//                                    }
+//                                    else
+//                                    {
+//                                        Intent intent = new Intent(MainActivity.this,BookListActivity.class);
+//                                        intent.putExtra("results",results);
+//                                        startActivity(intent);
+//                                    }
+//                                }
+//                                else {
+//                                    messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.result_not_found)));
+//                                    mAdapter.notifyDataSetChanged();
+//                                }
+//                            }
+//                        });
 
-        if (!message.equals("")){
-            messageList.add(new ChatMessage(ChatMessage.Message_To,message));
-            mAdapter.notifyDataSetChanged();
-            if(message.indexOf("找书") >= 0)
-            {
-                //游客登录状态，无查书权限
-                if (name.equals("visitor"))
+            case 5:
+                getList("book/author/"+message,BookListActivity.class);
+                break;
+            case 6:
+                getList("activity/queryAll",EventListActivity.class);
+                break;
+            //跳出常见问题列表
+            case 7:
+                getList("question/queryAll",QuestionListActivity.class);
+                break;
+            case 8:
+                if (cardid.equals("visitor"))
                 {
-                    messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.no_authority)));
-                    mAdapter.notifyDataSetChanged();
-                    return;
+                    messageList.add(new ChatMessage(ChatMessage.Message_From,"您是游客，请登录后查询积分"));
                 }
                 else
                 {
-                    messageList.add(new ChatMessage(ChatMessage.Message_From,"请说出你要找的书名"));
-                    mAdapter.notifyDataSetChanged();
-                    return;
-                }
-
-
-            }
-            else if (messageList.get(messageList.size()-2).getContent().equals("请说出你要找的书名"))
-            {
-                OkHttpClientManager.getAsyn("http://voice.tunnel.qydev.com/voice-app/book/name/"+message,
-                        new OkHttpClientManager.ResultCallback<String>()
-                        {
-                            @Override
-                            public void onError(Request request, Exception e)
+                    OkHttpClientManager.getAsyn(getString(R.string.domain)+"user/queryCredits/"+cardid,
+                            new OkHttpClientManager.ResultCallback<String>()
                             {
-                                e.printStackTrace();
-                            }
-                            @Override
-                            public void onResponse(String results)
-                            {
-                                if (!results.equals("")){
-                                    if (results.indexOf("not found") > 0){
-                                        messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.server_error)));
-                                        mAdapter.notifyDataSetChanged();
-                                    }
-                                    else
-                                    {
-                                        Intent intent = new Intent(MainActivity.this,BookListActivity.class);
-                                        intent.putExtra("results",results);
-                                        startActivity(intent);
-                                    }
+                                @Override
+                                public void onError(Request request, Exception e)
+                                {
+                                    e.printStackTrace();
                                 }
-                                else {
-                                    messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.book_not_found)));
+                                @Override
+                                public void onResponse(String credit)
+                                {
+                                    messageList.add(new ChatMessage(ChatMessage.Message_From,"您的积分为"+credit));
                                     mAdapter.notifyDataSetChanged();
                                 }
-                            }
-                        });
-            }
-            else
-            {
+                            });
+                }
+                break;
+            case 0:
                 OkHttpClientManager.getAsyn(TulingRobot.setParams(message),
                         new OkHttpClientManager.ResultCallback<RobotMessage>()
                         {
@@ -276,22 +321,119 @@ public class MainActivity extends Activity {
                             {
                                 messageList.add(new ChatMessage(ChatMessage.Message_From,robotMessage.getText()));
                                 mAdapter.notifyDataSetChanged();
+
                             }
                         });
-            }
+                break;
+            default:
+                Toast.makeText(MainActivity.this,"说点什么吧",Toast.LENGTH_LONG).show();
+                break;
+        }
+        return;
 
+////            else if (messageList.get(messageList.size()-2).getContent().equals("请说出您要问的问题"))
+////            {
+////                //对问题进行分词，将所有分词匹配，得到匹配的问题列表
+////                Analyzer analyzer = new PaodingAnalyzer();
+////                TokenStream tokenStream = analyzer.tokenStream(message,new StringReader(message));
+////                try
+////                {
+////                    Token t;
+////                }catch (IOException e)
+////                {
+////                    e.printStackTrace();
+////                }
+////            }
+
+    }
+    //查询书籍和活动跳转到列表页面
+    public void getList(String querychoice , final Class targetActivity)
+    {
+        OkHttpClientManager.getAsyn(getString(R.string.domain)+querychoice,
+                new OkHttpClientManager.ResultCallback<String>()
+                {
+                    @Override
+                    public void onError(Request request, Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+                    @Override
+                    public void onResponse(String results)
+                    {
+                        if (!results.equals("")){
+                            if (results.indexOf("not found") > 0){
+                                messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.server_error)));
+                                mAdapter.notifyDataSetChanged();
+                            }
+                            else
+                            {
+                                System.out.println(results);
+                                Intent intent = new Intent(MainActivity.this,targetActivity);
+                                intent.putExtra("results",results);
+                                startActivity(intent);
+                            }
+                        }
+                        else {
+                            messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.result_not_found)));
+                            mAdapter.notifyDataSetChanged();
+                        }
+                    }
+                });
+    }
+    //判断用户要进入的模式
+    public int schema(String message)
+    {
+        //想要找书
+        if (message.indexOf("找书") >= 0||message.indexOf("查书") >= 0)
+        {
+            return 1;
         }
-        else {
-            Toast.makeText(MainActivity.this,"说点什么吧",Toast.LENGTH_LONG).show();
+        //已经进入找书模式，需要用户说出书名
+        else if (messageList.get(messageList.size()-2).getContent().equals("请问您要根据什么找书？书名还是作者？")&&message.indexOf("书名") >= 0)
+        {
+            return 2;
         }
+        //进入找书模式，需要用户说出作者
+        else if (messageList.get(messageList.size()-2).getContent().equals("请问您要根据什么找书？书名还是作者？")&&message.indexOf("作者") >= 0)
+        {
+            return 3;
+        }
+        else if (messageList.get(messageList.size()-2).getContent().equals("请说出书名"))
+        {
+            return 4;
+        }
+        else if (messageList.get(messageList.size()-2).getContent().equals("请说出作者"))
+        {
+            return 5;
+        }
+        //查活动
+        else if (message.indexOf("活动") >= 0)
+        {
+            return 6;
+        }
+        //查图书馆常见问题
+        else if (message.indexOf("问题") >= 0)
+        {
+            return 7;
+        }
+        //查个人积分
+        else if (message.indexOf("积分") >= 0)
+        {
+            return 8;
+        }
+        //输入为空的情况
+        else if (message.equals(""))
+        {
+            return -1;
+        }
+        //不属于图书馆功能，使用图灵机器人返回信息
+        else
+        {
+            return 0;
+        }
+
     }
 
-//    /**
-//     * 发送文字输入的消息
-//     */
-//    public void send(){
-//
-//    }
 
     //聊天框样式展示
     private List<ChatMessage> LoadData()

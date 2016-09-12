@@ -6,13 +6,13 @@
 
     <ImageView
         android:id="@+id/Header"
-        android:layout_width="wrap_content"
+        android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_alignParentRight="true"
         android:layout_alignParentTop="true"
         android:layout_margin="10dp"
         android:contentDescription="@string/Description"
-        android:src="@mipmap/me">
+        android:src="@mipmap/touxiang">
     </ImageView>
         <TextView
             android:id="@+id/To_Content"

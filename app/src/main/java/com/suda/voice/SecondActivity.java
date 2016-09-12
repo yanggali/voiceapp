@@ -13,6 +13,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.squareup.okhttp.Request;
+import com.suda.utils.http.okhttp.OkHttpClientManager;
 import com.suda.voice.R;
 
 public class SecondActivity extends Activity {
@@ -21,12 +23,13 @@ public class SecondActivity extends Activity {
     private Button visitor;
     private Intent it;
     private SharedPreferences sharedinfo;
+    private SharedPreferences.Editor editor;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_second);
 
-        editText = (EditText)findViewById(R.id.username);
+        editText = (EditText)findViewById(R.id.cardid);
         editText.requestFocus();
 
         findViewById(R.id.loginpage).setOnClickListener(new OnClickListener() {
@@ -43,23 +46,45 @@ public class SecondActivity extends Activity {
             @Override
             public void onClick(View v) {
                 //保存用户信息
-                sharedinfo = getSharedPreferences("user", Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedinfo.edit();
-                String name = ((EditText)findViewById(R.id.username)).getText().toString().trim();
-                String password = ((EditText)findViewById(R.id.password)).getText().toString().trim();
-                if (name.equals("") || password.equals(""))
+                final String cardid = ((EditText)findViewById(R.id.cardid)).getText().toString().trim();
+                final String password = ((EditText)findViewById(R.id.password)).getText().toString().trim();
+                if (cardid.equals("") || password.equals(""))
                 {
-                    Toast.makeText(SecondActivity.this,"请输入用户名和密码",Toast.LENGTH_LONG).show();
+                    Toast.makeText(SecondActivity.this,"请输入卡号和密码",Toast.LENGTH_LONG).show();
                     return;
                 }
-                editor.putString("name",name);
-                editor.putString("password",password);
-                editor.commit();
-                Toast.makeText(SecondActivity.this,"用户登录成功",Toast.LENGTH_LONG).show();
+                //验证登录
+                else
+                {
+                    OkHttpClientManager.postAsyn(getString(R.string.domain)+"user/login",new OkHttpClientManager.ResultCallback<String>()
+                    {
+                        @Override
+                        public void onError(Request request, Exception e) {
 
-                it = new Intent(SecondActivity.this,MainActivity.class);
-                startActivity(it);
-                SecondActivity.this.finish();
+                        }
+                        @Override
+                        public void onResponse(String response) {
+                            if (response.equals("success"))
+                            {
+                                sharedinfo = getSharedPreferences("user", Context.MODE_PRIVATE);
+                                editor = sharedinfo.edit();
+                                editor.putString("cardid",cardid);
+                                editor.putString("password",password);
+                                editor.commit();
+                                Toast.makeText(SecondActivity.this,"用户登录成功",Toast.LENGTH_LONG).show();
+                                it = new Intent(SecondActivity.this,MainActivity.class);
+                                startActivity(it);
+                                SecondActivity.this.finish();
+                            }
+                            else
+                            {
+                                Toast.makeText(SecondActivity.this,"用户名或密码错误",Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    },new OkHttpClientManager.Param[]{
+                            new OkHttpClientManager.Param("cardid", cardid),
+                            new OkHttpClientManager.Param("password", password)});
+                }
             }
         });
         //游客身份登录
@@ -69,7 +94,7 @@ public class SecondActivity extends Activity {
             public void onClick(View v) {
                 sharedinfo = getSharedPreferences("user", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedinfo.edit();
-                editor.putString("name", "visitor");
+                editor.putString("cardid", "visitor");
                 editor.commit();
                 Toast.makeText(SecondActivity.this,"游客身份登录",Toast.LENGTH_LONG).show();
 

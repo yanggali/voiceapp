@@ -7,10 +7,11 @@ package com.suda.utils.chatrobot;
 public class RobotMessage {
     public String code;
     public String text;
-
-    public RobotMessage(String code,String text) {
+    public String url;
+    public RobotMessage(String code,String text,String url) {
         this.code = code;
         this.text = text;
+        this.url = url;
     }
 
     public String getCode() {
@@ -27,5 +28,13 @@ public class RobotMessage {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 }

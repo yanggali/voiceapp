@@ -482,7 +482,6 @@ public class OkHttpClientManager
         getInstance()._downloadAsyn(url, destDir, callback);
     }
 
-    //****************************
 
 
     private Request buildMultipartFormRequest(String url, File[] files,

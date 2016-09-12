@@ -28,7 +28,7 @@ public class BookActivity extends AppCompatActivity {
         });
 
         //将请求发送至服务器加载书目详情
-        OkHttpClientManager.getAsyn("http://voice.tunnel.qydev.com/voice-app/book/bid/"+bid,
+        OkHttpClientManager.getAsyn(getString(R.string.domain)+"book/bid/"+bid,
                 new OkHttpClientManager.ResultCallback<Book>()
                 {
                     @Override
@@ -59,46 +59,6 @@ public class BookActivity extends AppCompatActivity {
                         holdstatus.setText(holdstatus.getText()+":"+hold);
                     }
                 });
-        //创建okHttpClient对象
-//        OkHttpClient mOkHttpClient = new OkHttpClient();
-//        //创建一个Request
-//        Request request = new Request.Builder()
-//                .url("http://voice.tunnel.qydev.com/voice-app/book/bid/"+bid)
-//                .build();
-//        //new call
-//        Call call = mOkHttpClient.newCall(request);
-//        //请求加入调度
-//        call.enqueue(new Callback()
-//        {
-//            @Override
-//            public void onFailure(Request request, IOException e)
-//            {
-//            }
-//
-//            @Override
-//            public void onResponse(final Response response) throws IOException
-//            {
-//                final String getStr =  response.body().string();
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
-//                        TextView bname = (TextView)findViewById(R.id.bookname);
-//                        TextView bauthor = (TextView)findViewById(R.id.author);
-//                        TextView bpublisher = (TextView) findViewById(R.id.publisher);
-//                        TextView callno = (TextView)findViewById(R.id.callno);
-//                        TextView isbn = (TextView) findViewById(R.id.isbn);
-//                        TextView holdstatus = (TextView)findViewById(R.id.hold);
-//                        JSONObject book_object = JSON.parseObject(getStr);
-//                        bname.setText(book_object.getString("name"));
-//                        bauthor.setText(book_object.getString("author"));
-//                        bpublisher.setText(book_object.getString("publisher"));
-//                        isbn.setText(book_object.getString("isbn"));
-//                        callno.setText(book_object.getString("callno"));
-//                        holdstatus.setText(book_object.getString("holdPlaces")+"\n"+book_object.getString("holdStatus"));
-//                    }
-//                });
-//            }
-//        });
 
     }
 }

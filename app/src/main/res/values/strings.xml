@@ -1,20 +1,23 @@
 <resources>
+    <string name="domain">http://wx.cslib.cn/voice-app/</string>
     <string name="app_name">图睿</string>
     <string name="welcome">您身边的图书馆秘书</string>
     <string name="loginLeft">Forget password?</string>
     <string name="loginRight">New?Register here</string>
-    <string name="questions">亲，不懂可以摸摸我：有什么新书吗？《1Q84》在哪里？今天天气如何？</string>
+    <string name="questions">亲，不懂可以问问我：想找书吗？《1Q84》在哪里？今天天气如何？</string>
+    <string name="tips">欢迎回来，很高兴为您服务！您可以通过我找书，查询活动，询问我一些常见问题或者查看您的个人积分</string>
     <string name="Description">发送消息</string>
     <string name="hint">你想查询什么？请输入您要查询的书目名称</string>
     <string name="exception">没有查询到结果，请重新输入</string>
     <string name="booktitle">书目详情</string>
+    <string name="questiontitle">问题详情</string>
     <string name="bookname">书名</string>
     <string name="author">作者</string>
     <string name="publisher">出版社</string>
     <string name="isbn">isbn</string>
     <string name="callno">callno</string>
     <string name="hold">存放信息</string>
-    <string name="book_not_found">未查阅到相关书籍结果</string>
+    <string name="result_not_found">未查阅到相关结果</string>
     <string name="server_error">访问服务器错误</string>
     <string name="input_null">请输入您要查阅的书籍</string>
     <string name="no_authority">您暂时没有该权限</string>

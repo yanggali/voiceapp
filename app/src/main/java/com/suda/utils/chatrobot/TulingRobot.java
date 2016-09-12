@@ -20,13 +20,13 @@ import java.net.URLEncoder;
 public class TulingRobot {
     private static String API_KEY = "3914cb17f5f942609fefa061cc8a29e4";
     private static String URL = "http://www.tuling123.com/openapi/api";
-    private static ChatMessage message= new ChatMessage();
+    private static String replyMessage;
     /**
      * 发送一个消息，并得到返回的消息
      * @param msg
      * @return
      */
-    public static ChatMessage sendMsg(String msg) {
+    public static String sendMsg(String msg) {
         //查询Url
         String requestUrl = setParams(msg);
         OkHttpClientManager.getAsyn(requestUrl,
@@ -40,10 +40,12 @@ public class TulingRobot {
                     @Override
                     public void onResponse(RobotMessage robotMessage)
                     {
-                        message = new ChatMessage(ChatMessage.Message_From,robotMessage.getText());
+                        replyMessage = robotMessage.getText();
+                        return;
                     }
+
                 });
-        return message;
+        return replyMessage;
     }
     /**
      * 拼接Url
