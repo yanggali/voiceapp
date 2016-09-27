@@ -36,15 +36,12 @@ import com.suda.utils.chatrobot.RobotMessage;
 import com.suda.utils.chatrobot.TulingRobot;
 import com.suda.utils.http.okhttp.OkHttpClientManager;
 
-import net.paoding.analysis.analyzer.PaodingAnalyzer;
+import org.ansj.domain.Term;
+import org.ansj.splitWord.analysis.BaseAnalysis;
+import org.ansj.splitWord.analysis.ToAnalysis;
 
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.Token;
-import org.apache.lucene.analysis.TokenStream;
-
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 
@@ -281,12 +278,25 @@ public class MainActivity extends Activity {
                 break;
             //跳出常见问题列表
             case 7:
-                getList("question/queryAll",QuestionListActivity.class);
+                messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.ask_question)));
+                mAdapter.notifyDataSetChanged();
+//                getList("question/queryAll",QuestionListActivity.class);
+                break;
+            //问具体问题
+            case 9:
+                List<Term> term = BaseAnalysis.parse(message).getTerms();
+                System.out.println(term);
+                for (int i = 0; i < term.size(); i++) {
+                    String words = term.get(i).getName();// 获取单词
+                    String nominal = term.get(i).getNatureStr();// 获取词性
+                    System.out.println(words + "\t" + nominal);
+                }
                 break;
             case 8:
                 if (cardid.equals("visitor"))
                 {
                     messageList.add(new ChatMessage(ChatMessage.Message_From,"您是游客，请登录后查询积分"));
+                    mAdapter.notifyDataSetChanged();
                 }
                 else
                 {
@@ -330,20 +340,6 @@ public class MainActivity extends Activity {
                 break;
         }
         return;
-
-////            else if (messageList.get(messageList.size()-2).getContent().equals("请说出您要问的问题"))
-////            {
-////                //对问题进行分词，将所有分词匹配，得到匹配的问题列表
-////                Analyzer analyzer = new PaodingAnalyzer();
-////                TokenStream tokenStream = analyzer.tokenStream(message,new StringReader(message));
-////                try
-////                {
-////                    Token t;
-////                }catch (IOException e)
-////                {
-////                    e.printStackTrace();
-////                }
-////            }
 
     }
     //查询书籍和活动跳转到列表页面
@@ -420,6 +416,10 @@ public class MainActivity extends Activity {
         else if (message.indexOf("积分") >= 0)
         {
             return 8;
+        }
+        else if (messageList.get(messageList.size()-2).getContent().equals(getString(R.string.ask_question)))
+        {
+            return 9;
         }
         //输入为空的情况
         else if (message.equals(""))

@@ -20,4 +20,8 @@
         <item name="android:textSize">25sp</item>
         <item name="android:windowNoTitle">true</item>
     </style>
+    <style name="EventDetails">
+        <item name="android:textSize">25sp</item>
+        <!--<item name="android:typeface"></item>-->
+    </style>
 </resources>

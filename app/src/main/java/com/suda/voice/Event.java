@@ -8,13 +8,13 @@ public class Event {
     private String type;
     private String title;
     private String content;
-    private String starttime;
-    private String endtime;
+    private Long starttime;
+    private Long endtime;
 
     public Event() {
     }
 
-    public Event(String id, String type, String title, String content, String startTime, String endTime) {
+    public Event(String id, String type, String title, String content, Long startTime, Long endTime) {
         this.id = id;
         this.type = type;
         this.title = title;
@@ -55,19 +55,19 @@ public class Event {
         this.content = content;
     }
 
-    public String getStartTime() {
+    public Long getStartTime() {
         return starttime;
     }
 
-    public void setStartTime(String startTime) {
+    public void setStartTime(Long startTime) {
         this.starttime = startTime;
     }
 
-    public String getEndTime() {
+    public Long getEndTime() {
         return endtime;
     }
 
-    public void setEndTime(String endTime) {
+    public void setEndTime(Long endTime) {
         this.endtime = endTime;
     }
 }

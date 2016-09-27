@@ -29,9 +29,5 @@ dependencies {
     compile 'com.alibaba:fastjson:1.2.16'
     compile 'com.google.code.gson:gson:2.7'
     compile files('libs/Msc.jar')
-    compile files('libs/paoding-analysis.jar')
-    compile files('libs/commons-logging.jar')
-    compile files('libs/lucene-highlighter-2.2.0.jar')
-    compile files('libs/lucene-analyzers-2.2.0.jar')
-    compile files('libs/lucene-core-2.2.0.jar')
+    compile 'org.ansj:ansj_seg:5.0.2'
 }

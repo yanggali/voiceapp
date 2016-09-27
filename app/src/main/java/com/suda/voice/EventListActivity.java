@@ -31,21 +31,21 @@ public class EventListActivity extends AppCompatActivity {
             String title = jsonEvent.getString("title");
             String type = jsonEvent.getString("type");
             String content = jsonEvent.getString("content");
-            String starttime = jsonEvent.getString("starttime");
-            String endtime = jsonEvent.getString("endtime");
-            Event event = new Event(eid,title,type,content,starttime,endtime);
+            Long starttime = Long.parseLong(jsonEvent.getString("starttime"));
+            Long endtime = Long.parseLong(jsonEvent.getString("endtime"));
+            Event event = new Event(eid,type,title,content,starttime,endtime);
             eventlist.add(event);
         }
         eventAdapter = new EventAdapter(EventListActivity.this,eventlist);
         eventlist_layout.setAdapter(eventAdapter);
 
-//        eventlist_layout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                Intent intent = new Intent(EventListActivity.this, EventActivity.class);
-//                intent.putExtra("eid",eventlist.get(position).getId());
-//                startActivity(intent);
-//            }
-//        });
+        eventlist_layout.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(EventListActivity.this, EventActivity.class);
+                intent.putExtra("eid",eventlist.get(position).getId());
+                startActivity(intent);
+            }
+        });
     }
 }
