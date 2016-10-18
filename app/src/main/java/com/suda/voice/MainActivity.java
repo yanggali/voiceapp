@@ -21,6 +21,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.alibaba.fastjson.serializer.BooleanCodec;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.iflytek.cloud.ErrorCode;
@@ -176,11 +177,18 @@ public class MainActivity extends Activity {
         });
 
     }
-
+    //重新返回主界面
     @Override
     protected void onRestart() {
         super.onRestart();
-        messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.tips)));
+        if(messageList.get(messageList.size()-1).getmType() == 0)
+        {
+            messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.tips)));
+        }
+        else
+        {
+            messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.issatisfied)));
+        }
         mAdapter.notifyDataSetChanged();
     }
 
@@ -221,20 +229,29 @@ public class MainActivity extends Activity {
      */
     public void send(String message){
         editText.setText("");
-        messageList.add(new ChatMessage(ChatMessage.Message_To,message));
-        mAdapter.notifyDataSetChanged();
+        if (!message.equals(""))
+        {
+            messageList.add(new ChatMessage(ChatMessage.Message_To,message));
+            mAdapter.notifyDataSetChanged();
+        }
+        else
+        {
+            messageList.add(new ChatMessage(ChatMessage.Message_From,"说点什么吧"));
+            mAdapter.notifyDataSetChanged();
+            return;
+        }
         switch (schema(message))
         {
             case 1:
-                messageList.add(new ChatMessage(ChatMessage.Message_From,"请问您要根据什么找书？书名还是作者？"));
+                messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.book_by_what)));
                 mAdapter.notifyDataSetChanged();
                 break;
             case 2:
-                messageList.add(new ChatMessage(ChatMessage.Message_From,"请说出书名"));
+                messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.book_by_name)));
                 mAdapter.notifyDataSetChanged();
                 break;
             case 3:
-                messageList.add(new ChatMessage(ChatMessage.Message_From,"请说出作者"));
+                messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.book_by_author)));
                 mAdapter.notifyDataSetChanged();
                 break;
             case 4:
@@ -282,20 +299,12 @@ public class MainActivity extends Activity {
                 mAdapter.notifyDataSetChanged();
 //                getList("question/queryAll",QuestionListActivity.class);
                 break;
-            //问具体问题
-            case 9:
-                List<Term> term = BaseAnalysis.parse(message).getTerms();
-                System.out.println(term);
-                for (int i = 0; i < term.size(); i++) {
-                    String words = term.get(i).getName();// 获取单词
-                    String nominal = term.get(i).getNatureStr();// 获取词性
-                    System.out.println(words + "\t" + nominal);
-                }
-                break;
+
             case 8:
                 if (cardid.equals("visitor"))
                 {
-                    messageList.add(new ChatMessage(ChatMessage.Message_From,"您是游客，请登录后查询积分"));
+                    messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.visitor_limit)));
+                    messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.tips)));
                     mAdapter.notifyDataSetChanged();
                 }
                 else
@@ -317,6 +326,45 @@ public class MainActivity extends Activity {
                             });
                 }
                 break;
+            //问具体问题
+            case 9:
+                List<Term> term = BaseAnalysis.parse(message).getTerms();
+                String keywords = "";
+                for (int i = 0; i < term.size(); i++) {
+                    String words = term.get(i).getName();// 获取单词
+                    String nominal = term.get(i).getNatureStr();// 获取词性
+                    if (term.get(i).getNatureStr().equals("v")||term.get(i).getNatureStr().equals("n"))
+                    {
+                        keywords+=term.get(i).getName()+"&";
+                    }
+                }
+                System.out.println(keywords.substring(0,keywords.length()-1));
+//                OkHttpClientManager.getAsyn(getString(R.string.domain)+"question/keyword/"+cardid,
+//                        new OkHttpClientManager.ResultCallback<String>()
+//                        {
+//                            @Override
+//                            public void onError(Request request, Exception e)
+//                            {
+//                                e.printStackTrace();
+//                            }
+//                            @Override
+//                            public void onResponse(String credit)
+//                            {
+//                                messageList.add(new ChatMessage(ChatMessage.Message_From,"您的积分为"+credit));
+//                                mAdapter.notifyDataSetChanged();
+//                            }
+//                        });
+                break;
+            //对查询结果满意
+            case 10:
+                messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.satisfied)));
+                mAdapter.notifyDataSetChanged();
+                break;
+            //对查询结果不满意
+            case 11:
+                messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.not_satisfied)));
+                mAdapter.notifyDataSetChanged();
+                break;
             case 0:
                 OkHttpClientManager.getAsyn(TulingRobot.setParams(message),
                         new OkHttpClientManager.ResultCallback<RobotMessage>()
@@ -329,7 +377,15 @@ public class MainActivity extends Activity {
                             @Override
                             public void onResponse(RobotMessage robotMessage)
                             {
-                                messageList.add(new ChatMessage(ChatMessage.Message_From,robotMessage.getText()));
+                                System.out.println(robotMessage.getCode());
+                                if(robotMessage.getCode().equals("200000"))
+                                {
+                                    messageList.add(new ChatMessage(ChatMessage.Message_From,robotMessage.getText()+"<a href=\""+robotMessage.getUrl()+"\">"+robotMessage.getUrl()+"</a>"));
+                                }
+                                else
+                                {
+                                    messageList.add(new ChatMessage(ChatMessage.Message_From,robotMessage.getText()));
+                                }
                                 mAdapter.notifyDataSetChanged();
 
                             }
@@ -371,6 +427,7 @@ public class MainActivity extends Activity {
                         }
                         else {
                             messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.result_not_found)));
+                            messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.tips)));
                             mAdapter.notifyDataSetChanged();
                         }
                     }
@@ -380,46 +437,62 @@ public class MainActivity extends Activity {
     public int schema(String message)
     {
         //想要找书
-        if (message.indexOf("找书") >= 0||message.indexOf("查书") >= 0)
+        Boolean tips = messageList.get(messageList.size()-2).getContent().equals(getString(R.string.tips));
+        Boolean not_satisfied = messageList.get(messageList.size()-2).getContent().equals(getString(R.string.not_satisfied));
+        if (((tips||not_satisfied)&&(message.indexOf("1") >= 0||message.indexOf("一")>=0))
+                ||message.indexOf("找书") >= 0||message.indexOf("查书") >= 0)
         {
             return 1;
         }
         //已经进入找书模式，需要用户说出书名
-        else if (messageList.get(messageList.size()-2).getContent().equals("请问您要根据什么找书？书名还是作者？")&&message.indexOf("书名") >= 0)
+        else if (messageList.get(messageList.size()-2).getContent().equals(getString(R.string.book_by_what))&&(message.indexOf("书名") >= 0||message.indexOf("1")>=0||message.indexOf("一")>=0))
         {
             return 2;
         }
         //进入找书模式，需要用户说出作者
-        else if (messageList.get(messageList.size()-2).getContent().equals("请问您要根据什么找书？书名还是作者？")&&message.indexOf("作者") >= 0)
+        else if (messageList.get(messageList.size()-2).getContent().equals(getString(R.string.book_by_what))&&(message.indexOf("作者") >= 0||message.indexOf("2")>=0||message.indexOf("二")>=0))
         {
             return 3;
         }
-        else if (messageList.get(messageList.size()-2).getContent().equals("请说出书名"))
+        else if (messageList.get(messageList.size()-2).getContent().equals(getString(R.string.book_by_name)))
         {
             return 4;
         }
-        else if (messageList.get(messageList.size()-2).getContent().equals("请说出作者"))
+        else if (messageList.get(messageList.size()-2).getContent().equals(getString(R.string.book_by_author)))
         {
             return 5;
         }
         //查活动
-        else if (message.indexOf("活动") >= 0)
+        else if (message.indexOf("活动") >= 0||(messageList.get(messageList.size()-2).getContent().equals(getString(R.string.tips))
+                &&(message.indexOf("2") >= 0||message.indexOf("二") >= 0)))
         {
             return 6;
         }
         //查图书馆常见问题
-        else if (message.indexOf("问题") >= 0)
+        else if (message.indexOf("问题") >= 0||(messageList.get(messageList.size()-2).getContent().equals(getString(R.string.tips))
+                &&(message.indexOf("3") >= 0||message.indexOf("三") >= 0)))
         {
             return 7;
         }
         //查个人积分
-        else if (message.indexOf("积分") >= 0)
+        else if (message.indexOf("积分") >= 0||(messageList.get(messageList.size()-2).getContent().equals(getString(R.string.tips))
+                &&(message.indexOf("4") >= 0||message.indexOf("四") >= 0)))
         {
             return 8;
         }
         else if (messageList.get(messageList.size()-2).getContent().equals(getString(R.string.ask_question)))
         {
             return 9;
+        }
+        else if(messageList.get(messageList.size()-2).getContent().equals(getString(R.string.issatisfied))&&
+                (message.indexOf("满意")>=0||message.indexOf("一")>=0||message.indexOf("1")>=0))
+        {
+            return 10;
+        }
+        else if(messageList.get(messageList.size()-2).getContent().equals(getString(R.string.issatisfied))&&
+                (message.indexOf("不满意")>=0||message.indexOf("二")>=0||message.indexOf("2")>=0))
+        {
+            return 11;
         }
         //输入为空的情况
         else if (message.equals(""))

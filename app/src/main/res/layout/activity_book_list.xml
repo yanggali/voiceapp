@@ -4,11 +4,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.suda.voice.BookListActivity">
-
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:id="@+id/spinner"
+        android:background="#cfff"
+        />
     <ListView
         android:id="@+id/book_list"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
         android:padding="@dimen/activity_horizontal_padding"
         android:background="#8fff"
         android:transcriptMode="alwaysScroll"

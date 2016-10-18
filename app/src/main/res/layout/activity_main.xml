@@ -98,7 +98,7 @@
                     android:layout_weight="1"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="查询"
+                    android:text="发送"
                     android:visibility="gone"/>
 
             </LinearLayout>

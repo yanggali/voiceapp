@@ -1,9 +1,11 @@
 package com.suda.voice;
 
+import java.io.Serializable;
+
 /**
  * Edited by YangJiali on 2016/8/17 0017.
  */
-public class Book {
+public class Book implements Serializable{
     //基本信息，根据书名可获取
     private String bid;
     private String name;
