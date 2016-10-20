@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -24,11 +26,14 @@ public class SecondActivity extends Activity {
     private Intent it;
     private SharedPreferences sharedinfo;
     private SharedPreferences.Editor editor;
+    private ConnectivityManager connectivityManager;//用于判断是否有网络
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_second);
 
+        connectivityManager = (ConnectivityManager) SecondActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);//获取当前网络的连接服务
+        final NetworkInfo info = connectivityManager.getActiveNetworkInfo(); //获取活动的网络连接信息
         editText = (EditText)findViewById(R.id.cardid);
         editText.requestFocus();
 
@@ -45,6 +50,12 @@ public class SecondActivity extends Activity {
         login.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                if (info == null)
+                {
+                    Toast.makeText(SecondActivity.this, "检查网络连接是否打开", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 //保存用户信息
                 final String cardid = ((EditText)findViewById(R.id.cardid)).getText().toString().trim();
                 final String password = ((EditText)findViewById(R.id.password)).getText().toString().trim();
@@ -92,6 +103,11 @@ public class SecondActivity extends Activity {
         visitor.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (info == null)
+                {
+                    Toast.makeText(SecondActivity.this, "检查网络连接是否打开", Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 sharedinfo = getSharedPreferences("user", Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedinfo.edit();
                 editor.putString("cardid", "visitor");

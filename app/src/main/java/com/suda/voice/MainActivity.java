@@ -427,7 +427,7 @@ public class MainActivity extends Activity {
                         }
                         else {
                             messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.result_not_found)));
-                            messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.tips)));
+                            //messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.tips)));
                             mAdapter.notifyDataSetChanged();
                         }
                     }
@@ -438,61 +438,78 @@ public class MainActivity extends Activity {
     {
         //想要找书
         Boolean tips = messageList.get(messageList.size()-2).getContent().equals(getString(R.string.tips));
-        Boolean not_satisfied = messageList.get(messageList.size()-2).getContent().equals(getString(R.string.not_satisfied));
+        Boolean not_satisfied = messageList.get(messageList.size() - 2).getContent().equals(getString(R.string.not_satisfied));
+        String last_tip = messageList.get(messageList.size()-2).getContent();
         if (((tips||not_satisfied)&&(message.indexOf("1") >= 0||message.indexOf("一")>=0))
                 ||message.indexOf("找书") >= 0||message.indexOf("查书") >= 0)
         {
             return 1;
         }
         //已经进入找书模式，需要用户说出书名
-        else if (messageList.get(messageList.size()-2).getContent().equals(getString(R.string.book_by_what))&&(message.indexOf("书名") >= 0||message.indexOf("1")>=0||message.indexOf("一")>=0))
+        else if (last_tip.equals(getString(R.string.book_by_what))&&(message.indexOf("书名") >= 0||message.indexOf("1")>=0||message.indexOf("一")>=0))
         {
             return 2;
         }
         //进入找书模式，需要用户说出作者
-        else if (messageList.get(messageList.size()-2).getContent().equals(getString(R.string.book_by_what))&&(message.indexOf("作者") >= 0||message.indexOf("2")>=0||message.indexOf("二")>=0))
+        else if (last_tip.equals(getString(R.string.book_by_what))&&(message.indexOf("作者") >= 0||message.indexOf("2")>=0||message.indexOf("二")>=0))
         {
             return 3;
         }
-        else if (messageList.get(messageList.size()-2).getContent().equals(getString(R.string.book_by_name)))
+        else if (last_tip.equals(getString(R.string.book_by_name)))
         {
             return 4;
         }
-        else if (messageList.get(messageList.size()-2).getContent().equals(getString(R.string.book_by_author)))
+        else if (last_tip.equals(getString(R.string.book_by_author)))
         {
             return 5;
         }
         //查活动
-        else if (message.indexOf("活动") >= 0||(messageList.get(messageList.size()-2).getContent().equals(getString(R.string.tips))
+        else if (message.indexOf("活动") >= 0||(last_tip.equals(getString(R.string.tips))
                 &&(message.indexOf("2") >= 0||message.indexOf("二") >= 0)))
         {
             return 6;
         }
         //查图书馆常见问题
-        else if (message.indexOf("问题") >= 0||(messageList.get(messageList.size()-2).getContent().equals(getString(R.string.tips))
-                &&(message.indexOf("3") >= 0||message.indexOf("三") >= 0)))
+        else if (((tips||not_satisfied)&&(message.indexOf("3") >= 0||message.indexOf("三")>=0))
+                ||message.indexOf("问题") >= 0)
         {
             return 7;
         }
         //查个人积分
-        else if (message.indexOf("积分") >= 0||(messageList.get(messageList.size()-2).getContent().equals(getString(R.string.tips))
-                &&(message.indexOf("4") >= 0||message.indexOf("四") >= 0)))
+        else if (((tips||not_satisfied)&&(message.indexOf("4") >= 0||message.indexOf("四")>=0))
+                ||message.indexOf("积分") >= 0)
         {
             return 8;
         }
-        else if (messageList.get(messageList.size()-2).getContent().equals(getString(R.string.ask_question)))
+        else if (last_tip.equals(getString(R.string.ask_question)))
         {
             return 9;
         }
-        else if(messageList.get(messageList.size()-2).getContent().equals(getString(R.string.issatisfied))&&
+        else if(last_tip.equals(getString(R.string.issatisfied))&&
                 (message.indexOf("满意")>=0||message.indexOf("一")>=0||message.indexOf("1")>=0))
         {
             return 10;
         }
-        else if(messageList.get(messageList.size()-2).getContent().equals(getString(R.string.issatisfied))&&
+        else if(last_tip.equals(getString(R.string.issatisfied))&&
                 (message.indexOf("不满意")>=0||message.indexOf("二")>=0||message.indexOf("2")>=0))
         {
             return 11;
+        }
+        else if (last_tip.equals(getString(R.string.result_not_found)))
+        {
+            String schema = messageList.get(messageList.size()-4).getContent();
+            if (schema.equals(getString(R.string.book_by_name)))
+            {
+                return 4;
+            }
+            else if (schema.equals(getString(R.string.book_by_author)))
+            {
+                return 5;
+            }
+            else
+            {
+                return 7;
+            }
         }
         //输入为空的情况
         else if (message.equals(""))

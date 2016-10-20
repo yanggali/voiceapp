@@ -17,7 +17,7 @@
     <string name="isbn">isbn</string>
     <string name="callno">callno</string>
     <string name="hold">存放信息</string>
-    <string name="result_not_found">未查阅到相关结果</string>
+    <string name="result_not_found">未查阅到相关结果，请思考后准确说出</string>
     <string name="server_error">访问服务器错误</string>
     <string name="input_null">请输入您要查阅的书籍</string>
     <string name="no_authority">您暂时没有该权限</string>
