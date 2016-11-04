@@ -29,6 +29,7 @@
     <string name="issatisfied">您对本次服务还满意吗？1、满意  2、不满意</string>
     <string name="satisfied">您能感到满意是我莫大的荣幸</string>
     <string name="not_satisfied">您对哪里不满意，可以再次向我提问：1、找书 2、查询活动 3、查询常见问题 4、查看您的个人积分</string>
+    <string name="choose_accurate_one">请选择您的查询目标的序号</string>
     <string-array name="spingarr">
         <item>北京</item>
         <item>上海</item>

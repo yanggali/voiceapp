@@ -21,6 +21,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.BooleanCodec;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -42,9 +45,13 @@ import org.ansj.splitWord.analysis.BaseAnalysis;
 import org.ansj.splitWord.analysis.ToAnalysis;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-
+import java.util.Map;
+import java.util.Set;
 
 public class MainActivity extends Activity {
     private ImageView editView,voiceView,searchView;
@@ -58,6 +65,7 @@ public class MainActivity extends Activity {
     private ListView mList;
     private List<ChatMessage> messageList = new ArrayList<ChatMessage>();
     private String cardid;
+    private Map<Integer,String> fuzzybook_List;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -255,7 +263,8 @@ public class MainActivity extends Activity {
                 mAdapter.notifyDataSetChanged();
                 break;
             case 4:
-                getList("book/name/"+message,BookListActivity.class);
+                resultsList(message);
+                //getList("book/name/"+message,BookListActivity.class);
                 break;
 //                OkHttpClientManager.getAsyn(getString(R.string.domain)+"book/name/"+message,
 //                        new OkHttpClientManager.ResultCallback<String>()
@@ -287,6 +296,11 @@ public class MainActivity extends Activity {
 //                            }
 //                        });
 
+            case 12:
+                String accurate_name = fuzzybook_List.get(Integer.valueOf(message));
+                System.out.println(accurate_name);
+                getList("book/name/"+accurate_name,BookListActivity.class);
+                break;
             case 5:
                 getList("book/author/"+message,BookListActivity.class);
                 break;
@@ -398,6 +412,49 @@ public class MainActivity extends Activity {
         return;
 
     }
+    //返回模糊匹配结果
+    public void resultsList(String query)
+    {
+        //清除缓存
+        fuzzybook_List = new HashMap<>();
+        OkHttpClientManager.getAsyn(getString(R.string.domain)+"/book/key/"+query,
+                new OkHttpClientManager.ResultCallback<String>()
+                {
+                    @Override
+                    public void onError(Request request, Exception e)
+                    {
+                        e.printStackTrace();
+                    }
+                    @Override
+                    public void onResponse(String results)
+                    {
+                        if (results.equals("")){
+                            messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.result_not_found)));
+                            mAdapter.notifyDataSetChanged();
+                        }
+                        else {
+                            Set<String> bookname_list = new HashSet<String>();
+                            JSONObject booknames = JSON.parseObject(results);
+                            StringBuilder sb=new StringBuilder();
+                            for (int i=0;i <booknames.size();i++) {
+                                String bname = (String) booknames.get(String.valueOf(i));
+                                fuzzybook_List.put(i+1,bname);
+                                sb.append(i+1).append("、").append(bname);
+                            }
+//                            Iterator<String> it = bookname_list.iterator();
+//                            int i = 1;
+//                            while (it.hasNext())
+//                            {
+//                                fuzzybook_List.put(i,it.next());
+//                                i++;
+//                            }
+                            messageList.add(new ChatMessage(ChatMessage.Message_From,sb.toString()));
+                            messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.choose_accurate_one)));
+                            mAdapter.notifyDataSetChanged();
+                        }
+                    }
+                });
+    }
     //查询书籍和活动跳转到列表页面
     public void getList(String querychoice , final Class targetActivity)
     {
@@ -458,6 +515,10 @@ public class MainActivity extends Activity {
         else if (last_tip.equals(getString(R.string.book_by_name)))
         {
             return 4;
+        }
+        else if (last_tip.equals(getString(R.string.choose_accurate_one)))
+        {
+            return 12;
         }
         else if (last_tip.equals(getString(R.string.book_by_author)))
         {

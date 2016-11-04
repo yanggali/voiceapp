@@ -9,6 +9,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -40,6 +41,7 @@ public class BookListActivity extends AppCompatActivity {
         data_list = new HashSet<String>();
         booklist_layout = (ListView)findViewById(R.id.book_list);
         String results = getIntent().getStringExtra("results");
+        //booklist存放所有的查询结果信息
         booklist = new LinkedList<Book>();
         JSONArray books = JSON.parseArray(results);
 
@@ -68,7 +70,7 @@ public class BookListActivity extends AppCompatActivity {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
                 String choosePublisher = publisherList.get(arg2);
-                List<Book> chooseList = new LinkedList<Book>();
+                final List<Book> chooseList = new LinkedList<Book>();
                 if (choosePublisher.equals("所有出版社"))
                 {
                     bookAdapter = new BookAdapter(BookListActivity.this,booklist);
@@ -76,15 +78,39 @@ public class BookListActivity extends AppCompatActivity {
                 }
                 else
                 {
+                    String publisher;
                     for (int i = 0;i < booklist.size();i++)
                     {
-                        if (booklist.get(i).getbPublisher().equals(choosePublisher))
+                        publisher = booklist.get(i).getbPublisher();
+                        //选定出版社的书目列表筛选
+                        if (publisher.equals(choosePublisher))
                         {
-                            chooseList.add(booklist.get(i));
+                            OkHttpClientManager.getAsyn(getString(R.string.domain)+"book/query/"+booklist.get(i).getName()+"/"+publisher+"/10",
+                                    new OkHttpClientManager.ResultCallback<List<Book>>()
+                                    {
+                                        @Override
+                                        public void onError(Request request, Exception e)
+                                        {
+                                            e.printStackTrace();
+                                        }
+
+                                        @Override
+                                        public void onResponse(List<Book> books)
+                                        {
+                                            chooseList.clear();
+                                            for (int i = 0;i < books.size();i++)
+                                            {
+                                                chooseList.add(books.get(i));
+                                            }
+                                            //System.out.println(chooseList.size());
+                                            //chooseList中保存了选择出版社之后的书目的所有信息，对chooseList根据地理位置重新排序就好了，这里可以写一个方法，不要直接写在下面
+                                            bookAdapter = new BookAdapter(BookListActivity.this,chooseList);
+                                            booklist_layout.setAdapter(bookAdapter);
+                                        }
+                                    });
                         }
                     }
-                    bookAdapter = new BookAdapter(BookListActivity.this,chooseList);
-                    booklist_layout.setAdapter(bookAdapter);
+
                 }
 
             }
@@ -108,26 +134,7 @@ public class BookListActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        //使用数组形式操作
-        class SpinnerSelectedListener implements AdapterView.OnItemSelectedListener {
 
-            public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-                String choosePublisher = publisherList.get(arg2);
-                List<Book> chooseList = new LinkedList<Book>();
-                for (int i = 0;i < booklist.size();i++)
-                {
-                    if (booklist.get(i).getbPublisher().equals(choosePublisher))
-                    {
-                        chooseList.add(booklist.get(i));
-                    }
-                }
-                bookAdapter = new BookAdapter(BookListActivity.this,chooseList);
-                booklist_layout.setAdapter(bookAdapter);
-            }
-
-            public void onNothingSelected(AdapterView<?> arg0) {
-            }
-        }
     }
 
 }
