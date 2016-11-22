@@ -5,7 +5,7 @@
     <string name="loginLeft">Forget password?</string>
     <string name="loginRight">New?Register here</string>
     <string name="questions">亲，不懂可以问问我：想找书吗？《1Q84》在哪里？今天天气如何？</string>
-    <string name="tips">您可以向我查询以下问题： 1、找书 2、查询活动 3、查询常见问题 4、查看您的个人积分</string>
+    <string name="tips">您可以向我查询以下问题：&lt;br/&gt; 1、找书  &lt;br/&gt;2、查询活动 &lt;br/&gt; 3、查询常见问题 &lt;br/&gt; 4、查看您的个人积分</string>
     <string name="Description">发送消息</string>
     <string name="hint">你想查询什么？请输入您要查询的书目名称</string>
     <string name="exception">没有查询到结果，请重新输入</string>
@@ -22,14 +22,18 @@
     <string name="input_null">请输入您要查阅的书籍</string>
     <string name="no_authority">您暂时没有该权限</string>
     <string name="ask_question">请说出您要问的问题</string>
-    <string name="book_by_what">请问您要根据什么找书？1、书名 2、作者</string>
+    <string name="book_by_what">请问您要根据什么找书？&lt;br/&gt;1、书名 &lt;br/&gt;2、作者</string>
     <string name="book_by_author">请说出作者</string>
     <string name="book_by_name">请说出书名</string>
     <string name="visitor_limit">您是游客，请登陆后查询</string>
-    <string name="issatisfied">您对本次服务还满意吗？1、满意  2、不满意</string>
+    <string name="issatisfied">您对本次服务还满意吗？&lt;br/&gt;1、满意  &lt;br/&gt;2、不满意</string>
     <string name="satisfied">您能感到满意是我莫大的荣幸</string>
-    <string name="not_satisfied">您对哪里不满意，可以再次向我提问：1、找书 2、查询活动 3、查询常见问题 4、查看您的个人积分</string>
+    <string name="not_satisfied">您可以再次向我提问：&lt;br/&gt;1、找书 &lt;br/&gt;2、查询活动 &lt;br/&gt;3、查询常见问题 &lt;br/&gt;4、查看您的个人积分</string>
     <string name="choose_accurate_one">请选择您的查询目标的序号</string>
+    <string name="tuling_answer">您还是问问以下问题吧： &lt;br/&gt;1、找书 &lt;br/&gt;2、查询活动 &lt;br/&gt;3、查询常见问题 &lt;br/&gt;4、查看您的个人积分</string>
+    <string name="if_end">您要 &lt;br/&gt;1、退出登录 &lt;br/&gt;2、继续查询？</string>
+    <string name="wait">正在为您查询，请稍后^.^</string>
+    <string name="error">哎呀出错了！还要继续找书吗？&lt;br/&gt;1、是  &lt;br/&gt;2、不是</string>
     <string-array name="spingarr">
         <item>北京</item>
         <item>上海</item>

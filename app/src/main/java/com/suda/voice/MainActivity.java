@@ -5,8 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -22,9 +20,7 @@ import android.widget.Toast;
 
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.serializer.BooleanCodec;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.iflytek.cloud.ErrorCode;
@@ -38,17 +34,15 @@ import com.iflytek.cloud.ui.RecognizerDialogListener;
 import com.squareup.okhttp.Request;
 import com.suda.utils.chatrobot.RobotMessage;
 import com.suda.utils.chatrobot.TulingRobot;
+import com.suda.utils.dictionary.Dictionary;
 import com.suda.utils.http.okhttp.OkHttpClientManager;
 
 import org.ansj.domain.Term;
 import org.ansj.splitWord.analysis.BaseAnalysis;
-import org.ansj.splitWord.analysis.ToAnalysis;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -189,7 +183,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onRestart() {
         super.onRestart();
-        if(messageList.get(messageList.size()-1).getmType() == 0)
+        if(messageList.get(messageList.size()-2).getmType() == 0)
         {
             messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.tips)));
         }
@@ -262,7 +256,10 @@ public class MainActivity extends Activity {
                 messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.book_by_author)));
                 mAdapter.notifyDataSetChanged();
                 break;
+            //模糊查询
             case 4:
+                messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.wait)));
+                mAdapter.notifyDataSetChanged();
                 resultsList(message);
                 //getList("book/name/"+message,BookListActivity.class);
                 break;
@@ -297,14 +294,63 @@ public class MainActivity extends Activity {
 //                        });
 
             case 12:
-                String accurate_name = fuzzybook_List.get(Integer.valueOf(message));
-                System.out.println(accurate_name);
-                getList("book/name/"+accurate_name,BookListActivity.class);
+//                Dictionary dic = new Dictionary();
+//                int num = dic.getnum(message);
+//                if (num > 0)
+//                {
+//                    String accurate_name = fuzzybook_List.get(Integer.valueOf(num));
+//                    messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.wait)));
+//                    mAdapter.notifyDataSetChanged();
+//                    getList("book/name/"+accurate_name,BookListActivity.class);
+//                }
+//                else if(Integer.valueOf(message) > 0)
+//                {
+//                    String accurate_name = fuzzybook_List.get(Integer.valueOf(message));
+//                    messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.wait)));
+//                    mAdapter.notifyDataSetChanged();
+//                    getList("book/name/"+accurate_name,BookListActivity.class);
+//                }
+//                else
+//                {
+//                    messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.error)));
+//                    mAdapter.notifyDataSetChanged();
+//                }
+                try {
+                    Dictionary dic = new Dictionary();
+                    int num = dic.getnum(message);
+                    if (num > 0 && num <= 50)
+                    {
+                        String accurate_name = fuzzybook_List.get(Integer.valueOf(num));
+                        messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.wait)));
+                        mAdapter.notifyDataSetChanged();
+                        getList("book/name/"+accurate_name,BookListActivity.class);
+                    }
+                    else if (Integer.valueOf(message) > 0)
+                    {
+                        String accurate_name = fuzzybook_List.get(Integer.valueOf(message));
+                        messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.wait)));
+                        mAdapter.notifyDataSetChanged();
+                        getList("book/name/"+accurate_name,BookListActivity.class);
+                    }
+                    else
+                    {
+                        messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.error)));
+                        mAdapter.notifyDataSetChanged();
+                    }
+                }catch (Exception e)
+                {
+                    messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.error)));
+                    mAdapter.notifyDataSetChanged();
+                }
                 break;
             case 5:
+                messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.wait)));
+                mAdapter.notifyDataSetChanged();
                 getList("book/author/"+message,BookListActivity.class);
                 break;
             case 6:
+                messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.wait)));
+                mAdapter.notifyDataSetChanged();
                 getList("activity/queryAll",EventListActivity.class);
                 break;
             //跳出常见问题列表
@@ -372,11 +418,25 @@ public class MainActivity extends Activity {
             //对查询结果满意
             case 10:
                 messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.satisfied)));
+                messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.if_end)));
                 mAdapter.notifyDataSetChanged();
                 break;
-            //对查询结果不满意
+            //对查询结果不满意或者满意之后还要继续提问
             case 11:
-                messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.not_satisfied)));
+                messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.tips)));
+                mAdapter.notifyDataSetChanged();
+                break;
+            //用户退出登录
+            case 13:
+                Intent it = new Intent(MainActivity.this,SecondActivity.class);
+                startActivity(it);
+                break;
+            case 14:
+                messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.choose_accurate_one)));
+                mAdapter.notifyDataSetChanged();
+                break;
+            case 15:
+                messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.tips)));
                 mAdapter.notifyDataSetChanged();
                 break;
             case 0:
@@ -400,6 +460,7 @@ public class MainActivity extends Activity {
                                 {
                                     messageList.add(new ChatMessage(ChatMessage.Message_From,robotMessage.getText()));
                                 }
+                                messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.tips)));
                                 mAdapter.notifyDataSetChanged();
 
                             }
@@ -436,10 +497,12 @@ public class MainActivity extends Activity {
                             Set<String> bookname_list = new HashSet<String>();
                             JSONObject booknames = JSON.parseObject(results);
                             StringBuilder sb=new StringBuilder();
-                            for (int i=0;i <booknames.size();i++) {
+                            //最多取前50本书
+                            int booksize = 50<booknames.size() ? 50:booknames.size();
+                            for (int i=0;i <booksize;i++) {
                                 String bname = (String) booknames.get(String.valueOf(i));
                                 fuzzybook_List.put(i+1,bname);
-                                sb.append(i+1).append("、").append(bname);
+                                sb.append(i+1).append("、").append(bname).append("<br/>");
                             }
 //                            Iterator<String> it = bookname_list.iterator();
 //                            int i = 1;
@@ -495,9 +558,9 @@ public class MainActivity extends Activity {
     {
         //想要找书
         Boolean tips = messageList.get(messageList.size()-2).getContent().equals(getString(R.string.tips));
-        Boolean not_satisfied = messageList.get(messageList.size() - 2).getContent().equals(getString(R.string.not_satisfied));
+
         String last_tip = messageList.get(messageList.size()-2).getContent();
-        if (((tips||not_satisfied)&&(message.indexOf("1") >= 0||message.indexOf("一")>=0))
+        if (((tips)&&(message.indexOf("1") >= 0||message.indexOf("一")>=0))
                 ||message.indexOf("找书") >= 0||message.indexOf("查书") >= 0)
         {
             return 1;
@@ -531,13 +594,13 @@ public class MainActivity extends Activity {
             return 6;
         }
         //查图书馆常见问题
-        else if (((tips||not_satisfied)&&(message.indexOf("3") >= 0||message.indexOf("三")>=0))
+        else if (((tips)&&(message.indexOf("3") >= 0||message.indexOf("三")>=0))
                 ||message.indexOf("问题") >= 0)
         {
             return 7;
         }
         //查个人积分
-        else if (((tips||not_satisfied)&&(message.indexOf("4") >= 0||message.indexOf("四")>=0))
+        else if (((tips)&&(message.indexOf("4") >= 0||message.indexOf("四")>=0))
                 ||message.indexOf("积分") >= 0)
         {
             return 8;
@@ -558,7 +621,7 @@ public class MainActivity extends Activity {
         }
         else if (last_tip.equals(getString(R.string.result_not_found)))
         {
-            String schema = messageList.get(messageList.size()-4).getContent();
+            String schema = messageList.get(messageList.size()-5).getContent();
             if (schema.equals(getString(R.string.book_by_name)))
             {
                 return 4;
@@ -567,19 +630,35 @@ public class MainActivity extends Activity {
             {
                 return 5;
             }
+            else if (schema.equals(getString(R.string.choose_accurate_one)))
+            {
+                return 12;
+            }
             else
             {
-                return 7;
+                return 11;
             }
         }
-        //输入为空的情况
-        else if (message.equals(""))
+        else if (last_tip.equals(getString(R.string.if_end))&&(message.indexOf("1")>=0||message.indexOf("一") >= 0))
         {
+            return 13;
+        } else if (last_tip.equals(getString(R.string.if_end)) && (message.indexOf("2") >= 0 || message.indexOf("二") >= 0)) {
+            return 11;
+        }
+        else if (last_tip.equals(getString(R.string.error))&&(message.indexOf("1") >= 0 || message.indexOf("一") >= 0))
+        {
+            return 14;
+        }
+        else if (last_tip.equals(getString(R.string.error))&&(message.indexOf("2") >= 0 || message.indexOf("二") >= 0))
+        {
+            return 15;
+        }
+        //输入为空的情况
+        else if (message.equals("")) {
             return -1;
         }
         //不属于图书馆功能，使用图灵机器人返回信息
-        else
-        {
+        else {
             return 0;
         }
 

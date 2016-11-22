@@ -47,7 +47,7 @@ public class ChatAdapter extends BaseAdapter{
             case ChatMessage.Message_To:
                 convertView = LayoutInflater.from(mContext).inflate(R.layout.send_message_to, null);
                 content = (TextView)convertView.findViewById(R.id.To_Content);
-                content.setText(mData.get(position).getContent());
+                content.setText(Html.fromHtml(mData.get(position).getContent()));
                 break;
             case ChatMessage.Message_From:
                 convertView = LayoutInflater.from(mContext).inflate(R.layout.send_message_from,null);

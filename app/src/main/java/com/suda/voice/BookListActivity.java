@@ -1,15 +1,20 @@
 package com.suda.voice;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
-import android.widget.TextView;
+import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
@@ -31,10 +36,45 @@ public class BookListActivity extends AppCompatActivity {
     private BookAdapter bookAdapter;
     private ListView booklist_layout;
     private List<String> publisherList;
+    private List<Book> chooseList = new LinkedList<Book>();
+
+    //注册地理位置监听器及定义经纬度
+    private LocationManager locationmanger;
+    private String locationProvider;
+    private double lon;
+    private double lat;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_list);
+
+        //注册地理位置监听器及定义经纬度的具体实现
+        locationmanger = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        List<String> providers = locationmanger.getProviders(true);
+        if (providers.contains(LocationManager.GPS_PROVIDER)) {
+            //如果是GPS
+            locationProvider = LocationManager.GPS_PROVIDER;
+        } else if (providers.contains(LocationManager.NETWORK_PROVIDER)) {
+            //如果是Network
+            locationProvider = LocationManager.NETWORK_PROVIDER;
+        } else {
+            Toast.makeText(this, "没有可用的位置提供器", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        Location location = locationmanger.getLastKnownLocation(locationProvider);
+        if (location != null) {
+            lon = location.getLongitude();
+            lat = location.getLatitude();
+
+        }
+        //以上部分为获得经纬度
+
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
         // 初始化下拉列表
         spinner = (Spinner)findViewById(R.id.spinner);
@@ -56,7 +96,7 @@ public class BookListActivity extends AppCompatActivity {
             data_list.add(bpublisher);
             Book temp = new Book(bid, bname, bauthor, bpublisher, isbn, null, null, null);
             booklist.add(temp);
-          }
+        }
 //        bookAdapter = new BookAdapter(BookListActivity.this,booklist);
 //        booklist_layout.setAdapter(bookAdapter);
         //将hashset转换成arraylist
@@ -70,7 +110,7 @@ public class BookListActivity extends AppCompatActivity {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
                 String choosePublisher = publisherList.get(arg2);
-                final List<Book> chooseList = new LinkedList<Book>();
+                //final List<Book> chooseList = new LinkedList<Book>();
                 if (choosePublisher.equals("所有出版社"))
                 {
                     bookAdapter = new BookAdapter(BookListActivity.this,booklist);
@@ -78,6 +118,7 @@ public class BookListActivity extends AppCompatActivity {
                 }
                 else
                 {
+
                     String publisher;
                     for (int i = 0;i < booklist.size();i++)
                     {
@@ -98,11 +139,16 @@ public class BookListActivity extends AppCompatActivity {
                                         public void onResponse(List<Book> books)
                                         {
                                             chooseList.clear();
+                                            function fun = new function();
                                             for (int i = 0;i < books.size();i++)
                                             {
                                                 chooseList.add(books.get(i));
                                             }
-                                            //System.out.println(chooseList.size());
+
+                                            //排序功能
+                                            fun.sortdis(chooseList,lon,lat);
+                                            //
+
                                             //chooseList中保存了选择出版社之后的书目的所有信息，对chooseList根据地理位置重新排序就好了，这里可以写一个方法，不要直接写在下面
                                             bookAdapter = new BookAdapter(BookListActivity.this,chooseList);
                                             booklist_layout.setAdapter(bookAdapter);
@@ -110,13 +156,10 @@ public class BookListActivity extends AppCompatActivity {
                                     });
                         }
                     }
-
                 }
-
             }
-
-        public void onNothingSelected(AdapterView<?> arg0) {
-        }
+            public void onNothingSelected(AdapterView<?> arg0) {
+            }
         });
         //加载适配器
         spinner.setAdapter(arr_adapter);
@@ -128,13 +171,12 @@ public class BookListActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intent = new Intent(BookListActivity.this, BookActivity.class);
                 intent.putExtra("bid",booklist.get(position).getbId());
+                intent.putExtra("bid",booklist.get(position).getbId());
 //                Bundle bundle = new Bundle();
 //                bundle.putSerializable("book",booklist.get(position));
 //                intent.putExtras(bundle);
                 startActivity(intent);
             }
         });
-
     }
-
 }

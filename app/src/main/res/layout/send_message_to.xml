@@ -22,6 +22,6 @@
             android:background="@drawable/qipaoright"
             android:contentDescription="@string/Description"
             android:textIsSelectable="false"
-            android:gravity="center">
+            android:gravity="center_vertical|left">
         </TextView>
 </RelativeLayout>
