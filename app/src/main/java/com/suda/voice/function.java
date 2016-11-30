@@ -11,10 +11,11 @@ import java.util.Map;
  * Created by lijian on 2016/11/21.
  */
 public class function {
-    static double DEF_PI = 3.14159265359; // PI
-    static double DEF_2PI= 6.28318530712; // 2*PI
-    static double DEF_PI180= 0.01745329252; // PI/180.0
-    static double DEF_R =6370693.5; // radius of earth
+    static double EARTH_RADIUS = 6378137; // radius of earth
+    public double rad(double d)
+    {
+        return d * Math.PI / 180.0;
+    }
 
     //计算自己坐标和图书馆位置的距离
     public  double GeShortDistance(double lon1, double lat1, String point)
@@ -23,26 +24,37 @@ public class function {
         String []temp = point.split(",");
         double lon2 = Double.parseDouble(temp[0]);
         double lat2 = Double.parseDouble(temp[1]);
-        double ew1, ns1, ew2, ns2;
-        double dx, dy, dew;
-        double distance;
-        // 角度转换为弧度
-        ew1 = lon1 * DEF_PI180;
-        ns1 = lat1 * DEF_PI180;
-        ew2 = lon2 * DEF_PI180;
-        ns2 = lat2 * DEF_PI180;
-        // 经度差
-        dew = ew1 - ew2;
-        // 若跨东经和西经180 度，进行调整
-        if (dew > DEF_PI)
-            dew = DEF_2PI - dew;
-        else if (dew < -DEF_PI)
-            dew = DEF_2PI + dew;
-        dx = DEF_R * Math.cos(ns1) * dew; // 东西方向长度(在纬度圈上的投影长度)
-        dy = DEF_R * (ns1 - ns2); // 南北方向长度(在经度圈上的投影长度)
-        // 勾股定理求斜边长
-        distance = Math.sqrt(dx * dx + dy * dy);
-        return distance;
+        double radLat1 = rad(lat1);
+        double radLat2 = rad(lat2);
+
+        double radLon1 = rad(lon1);
+        double radLon2 = rad(lon2);
+
+        if (radLat1 < 0)
+            radLat1 = Math.PI / 2 + Math.abs(radLat1);// south
+        if (radLat1 > 0)
+            radLat1 = Math.PI / 2 - Math.abs(radLat1);// north
+        if (radLon1 < 0)
+            radLon1 = Math.PI * 2 - Math.abs(radLon1);// west
+        if (radLat2 < 0)
+            radLat2 = Math.PI / 2 + Math.abs(radLat2);// south
+        if (radLat2 > 0)
+            radLat2 = Math.PI / 2 - Math.abs(radLat2);// north
+        if (radLon2 < 0)
+            radLon2 = Math.PI * 2 - Math.abs(radLon2);// west
+        double x1 = EARTH_RADIUS * Math.cos(radLon1) * Math.sin(radLat1);
+        double y1 = EARTH_RADIUS * Math.sin(radLon1) * Math.sin(radLat1);
+        double z1 = EARTH_RADIUS * Math.cos(radLat1);
+
+        double x2 = EARTH_RADIUS * Math.cos(radLon2) * Math.sin(radLat2);
+        double y2 = EARTH_RADIUS * Math.sin(radLon2) * Math.sin(radLat2);
+        double z2 = EARTH_RADIUS * Math.cos(radLat2);
+
+        double d = Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2)+ (z1 - z2) * (z1 - z2));
+        //余弦定理求夹角
+        double theta = Math.acos((EARTH_RADIUS * EARTH_RADIUS + EARTH_RADIUS * EARTH_RADIUS - d * d) / (2 * EARTH_RADIUS * EARTH_RADIUS));
+        double dist = theta * EARTH_RADIUS;
+        return dist;
     }
 
     public String getpositon(Map<String,String> map, String name){
