@@ -1,6 +1,7 @@
 package com.suda.voice;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -51,40 +52,50 @@ public class function {
         }
         return "no";
     }
-    public boolean com(double a,double b){
+    public int com(double a,double b){
         BigDecimal data1 = new BigDecimal(a);
         BigDecimal data2 = new BigDecimal(b);
-        if(data1.compareTo(data2)<0){
-            return true;
+        if(data1.compareTo(data2) == 0){
+            return 0;
+        }else if(data1.compareTo(data2) < 0){
+            return -1;
         }else{
-            return false;
+            return 1;
         }
     }
 
-    public Double Min(List<Double> alldis ){
+    /*public Double Min(List<Double> alldis ){
         double min = Double.MAX_VALUE;
         for (int i = 0;i<alldis.size();i++){
-            if(com(alldis.get(i),min)){
+            if(com(alldis.get(i),min) == -1){
                 min = alldis.get(i);
             }
         }
         return min;
-    }
+    }*/
 
     public double getdis(Map<String,String> map,Book b,double lon,double lat){
-        List<Double> alldis = new ArrayList<Double>();
+        double min = Double.MAX_VALUE;
+        int count = 0;
         for(int i = 0 ;i<b.getHoldPlaces().length;i++){
             if(!b.getHoldPlaces()[i].contains("乡镇、村(社区)流通点")){
                 String position = getpositon(map,b.getHoldPlaces()[i]);
                 if(!position.equals("no")){
-                    alldis.add(GeShortDistance(lon,lat,position));
+                    double temp = Math.min(min,GeShortDistance(lon,lat,position));
+                    if(com(temp,min) == -1){
+                        min = temp;
+                        count = i;
+                    }
                 }
             }
         }
-        if(alldis.size() == 0){
+        if(min==Double.MAX_VALUE){
             return 0;
-        }else{
-            return Min(alldis);
+        }else {
+            DecimalFormat df = new DecimalFormat("######0.00");
+            b.setPosition(b.getHoldPlaces()[count]);
+            b.setDistance(Double.valueOf(df.format(min/1000)));
+            return min;
         }
     }
 
@@ -93,7 +104,7 @@ public class function {
         for(int i = 0;i<alldis.length-1;i++) {
             min=i;
             for(int j=i+1;j<alldis.length;j++) {
-                if(com(alldis[j],alldis[min]))
+                if(com(alldis[j],alldis[min]) == -1)
                 {
                     min=j;
                 }

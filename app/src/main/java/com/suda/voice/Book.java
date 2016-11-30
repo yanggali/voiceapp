@@ -16,7 +16,8 @@ public class Book implements Serializable{
     private String callNo;
     private String[] holdPlaces;
     private String[] holdStatus;
-
+    private String position;
+    private Double distance;
     public Book(){
 
     }
@@ -96,5 +97,21 @@ public class Book implements Serializable{
 
     public void setHoldStatus(String[] holdStatus) {
         this.holdStatus = holdStatus;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setDistance(Double distance) {
+        this.distance = distance;
+    }
+
+    public Double getDistance() {
+        return distance;
     }
 }

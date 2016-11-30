@@ -11,6 +11,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -52,6 +54,7 @@ public class BookAdapter extends BaseAdapter{
             holder.txt_bName = (TextView) convertView.findViewById(R.id.item_book_name);
             holder.txt_bAuthor = (TextView) convertView.findViewById(R.id.item_book_author);
             holder.txt_bPublisher = (TextView) convertView.findViewById(R.id.item_book_publisher);
+            holder.txt_bPosition = (TextView)convertView.findViewById(R.id.position);
             convertView.setTag(holder);   //将Holder存储到convertView中
         }else{
             holder = (ViewHolder) convertView.getTag();
@@ -59,12 +62,13 @@ public class BookAdapter extends BaseAdapter{
         holder.txt_bName.setText(mData.get(position).getName());
         holder.txt_bAuthor.setText(mData.get(position).getbAuthor());
         holder.txt_bPublisher.setText(mData.get(position).getbPublisher());
-
+        holder.txt_bPosition.setText(mData.get(position).getPosition()+" "+mData.get(position).getDistance()+"km");
         return convertView;
     }
     static class ViewHolder{
         TextView txt_bName;
         TextView txt_bAuthor;
         TextView txt_bPublisher;
+        TextView txt_bPosition;
     }
 }

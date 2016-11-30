@@ -497,23 +497,24 @@ public class MainActivity extends Activity {
                             Set<String> bookname_list = new HashSet<String>();
                             JSONObject booknames = JSON.parseObject(results);
                             StringBuilder sb=new StringBuilder();
-                            //最多取前50本书
-                            int booksize = 50<booknames.size() ? 50:booknames.size();
-                            for (int i=0;i <booksize;i++) {
-                                String bname = (String) booknames.get(String.valueOf(i));
-                                fuzzybook_List.put(i+1,bname);
-                                sb.append(i+1).append("、").append(bname).append("<br/>");
+                            //最多取前50本书,如果只有一本书则直接跳出结果
+                            if(booknames.size() == 1)
+                            {
+                                getList("book/name/"+booknames.get("0"),BookListActivity.class);
                             }
-//                            Iterator<String> it = bookname_list.iterator();
-//                            int i = 1;
-//                            while (it.hasNext())
-//                            {
-//                                fuzzybook_List.put(i,it.next());
-//                                i++;
-//                            }
-                            messageList.add(new ChatMessage(ChatMessage.Message_From,sb.toString()));
-                            messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.choose_accurate_one)));
-                            mAdapter.notifyDataSetChanged();
+                            else
+                            {
+                                int booksize = 50<booknames.size() ? 50:booknames.size();
+                                for (int i=0;i <booksize;i++) {
+                                    String bname = (String) booknames.get(String.valueOf(i));
+                                    fuzzybook_List.put(i+1,bname);
+                                    sb.append(i+1).append("、").append(bname).append("<br/>");
+                                }
+                                messageList.add(new ChatMessage(ChatMessage.Message_From,sb.toString()));
+                                messageList.add(new ChatMessage(ChatMessage.Message_From,getString(R.string.choose_accurate_one)));
+                                mAdapter.notifyDataSetChanged();
+                            }
+
                         }
                     }
                 });
@@ -610,14 +611,14 @@ public class MainActivity extends Activity {
             return 9;
         }
         else if(last_tip.equals(getString(R.string.issatisfied))&&
-                (message.indexOf("满意")>=0||message.indexOf("一")>=0||message.indexOf("1")>=0))
-        {
-            return 10;
-        }
-        else if(last_tip.equals(getString(R.string.issatisfied))&&
                 (message.indexOf("不满意")>=0||message.indexOf("二")>=0||message.indexOf("2")>=0))
         {
             return 11;
+        }
+        else if(last_tip.equals(getString(R.string.issatisfied))&&
+                (message.indexOf("满意")>=0||message.indexOf("一")>=0||message.indexOf("1")>=0))
+        {
+            return 10;
         }
         else if (last_tip.equals(getString(R.string.result_not_found)))
         {
