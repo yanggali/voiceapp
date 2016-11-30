@@ -19,6 +19,7 @@ public class function {
     //计算自己坐标和图书馆位置的距离
     public  double GeShortDistance(double lon1, double lat1, String point)
     {
+
         String []temp = point.split(",");
         double lon2 = Double.parseDouble(temp[0]);
         double lat2 = Double.parseDouble(temp[1]);
