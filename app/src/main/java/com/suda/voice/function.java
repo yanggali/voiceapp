@@ -1,5 +1,7 @@
 package com.suda.voice;
 
+import android.os.CountDownTimer;
+
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -135,6 +137,15 @@ public class function {
     }
 
     public void sortdis(List<Book> chooseList,double lon,double lat){
+        for (int i = 0;i < chooseList.size();i++)
+        {
+            System.out.print(chooseList.get(i).getbId()+" ");
+            for (int j = 0;j < chooseList.get(i).getHoldPlaces().length;j++)
+            {
+                System.out.print(chooseList.get(i).getHoldPlaces()[j]);
+            }
+            System.out.println();
+        }
         Map<String,String> map = new HashMap<String,String>();
         List<Book> temp = new LinkedList<Book>();
         String []allbid = new String[chooseList.size()];
@@ -159,6 +170,16 @@ public class function {
             System.out.println(alldis[i]);
         }
         // System.out.println(lon+","+lat+"gggg");
+        System.out.println("排完序");
+        for (int i = 0;i < chooseList.size();i++)
+        {
+            System.out.print(chooseList.get(i).getbId()+" ");
+            for (int j = 0;j < chooseList.get(i).getHoldPlaces().length;j++)
+            {
+                System.out.print(chooseList.get(i).getHoldPlaces()[j]);
+            }
+            System.out.println();
+        }
     }
 
     public  void input(Map<String,String> map){
